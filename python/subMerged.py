@@ -7,6 +7,7 @@ import asyncio
 
 # left motor is connected to port A and right motor is connected to port B
 
+# Aliases for Going Left right back and forward
 class Direction:
     LEFT = -1
     BACKWARD = -1
@@ -15,14 +16,20 @@ class Direction:
     UP = 1
     DOWN = -1
 
+"""
+Get drift gives how much you are drifted from your tgt_yaw angle.
+"""
 def get_drift(tgt_yaw):
     c_yaw = get_yaw()
-    if tgt_yaw > 270 and c_yaw < 90:
+    # When robot is close to 360, it can drift to 2 or drift to 359 
+    # This will take into consideration all the cases.
+    if tgt_yaw > 270 and c_yaw < 90:   #This condition is when your target yaw is in Q4 and Current yaw is in Q1
         drift = 360 - tgt_yaw + c_yaw
     else:
         drift = c_yaw - tgt_yaw
 
     return drift
+
 
 """
 Gives current yaw in between 0 to 359
@@ -31,8 +38,10 @@ When turning right we get negative Yaw values
 """
 def get_yaw() -> int:
     yaw = motion_sensor.tilt_angles()[0]
-    yaw = (round(yaw/10 * -1) + 360) % 360# Get Remainder, Yaw angle after one full circle.
+    # Get Remainder, Yaw angle after one full circle.
+    yaw = (round(yaw/10 * -1) + 360) % 360
     return yaw
+
 
 """
 Give the angle difference between current yaw and target yaw
@@ -52,28 +61,30 @@ def angleDiff(tgt_yaw):
         return 360 - tgt_yaw + cur_yaw
     elif tgt_yaw > cur_yaw:
         return tgt_yaw - cur_yaw
-    
+
     return cur_yaw - tgt_yaw
 
-
-async def straight(speed, distance, f_b):
+"""
+Takes straight
+"""
+async def straight(speed :int , distance :int, direction):
     global g_yaw
     tgtYaw = g_yaw
     # Pair motors on port A and port B
-    #resets the relative position of one of the wheels
+    # resets the relative position of one of the wheels
     motor.reset_relative_position(port.B, 0)
     drift = get_drift(tgtYaw)
 
     while distance > abs(motor.relative_position(port.B)):
-        #sets the return value of the tuple to a tuple, so we can pull a specific value from it
+        # sets the return value of the tuple to a tuple, so we can pull a specific value from it
         drift = get_drift(tgtYaw)
-        motor_pair.move(motor_pair.PAIR_1, drift * -1, velocity = speed * f_b, acceleration = 500)
-    
-    #stops the motors after they are out of the while loop
+        motor_pair.move(motor_pair.PAIR_1, drift * -1,
+                        velocity=speed * direction, acceleration=500)
+
+    # stops the motors after they are out of the while loop
     motor_pair.stop(motor_pair.PAIR_1)
 
     await runloop.sleep_ms(100)
-
 
 
 """
@@ -81,6 +92,8 @@ direction is Direction.RIGHT or Direction.LEFT
 degrees: Amount of degrees to turn
 speed: speed at which to turn
 """
+
+
 async def turn(direction, degrees, speed):
     global g_yaw
     tgtYaw = g_yaw
@@ -88,25 +101,28 @@ async def turn(direction, degrees, speed):
     if direction == Direction.RIGHT:
         while angleDiff(tgtYaw) > 0:
             tgtYaw = (g_yaw + degrees) % 360
-            motor.run(port.A, speed * Direction.RIGHT * -1)  # We need to turn both wheels backwards to turn Right
+            # We need to turn both wheels backwards to turn Right
+            motor.run(port.A, speed * Direction.RIGHT * -1)
             motor.run(port.B, speed * Direction.RIGHT * -1)
     elif direction == Direction.LEFT:
         tgtYaw = (g_yaw - degrees + 360) % 360
-        while angleDiff(tgtYaw) > 0:  #Angle diff gives us the difference between my current yaw and the target yaw
+        # Angle diff gives us the difference between my current yaw and the target yaw
+        while angleDiff(tgtYaw) > 0:
             motor.run(port.A, speed)
             motor.run(port.B, speed)
 
-    motor_pair.stop(motor_pair.PAIR_1, stop = motor.SMART_BRAKE)
+    motor_pair.stop(motor_pair.PAIR_1, stop=motor.SMART_BRAKE)
     g_yaw = tgtYaw  # Save the target yaw into our Global yaw.
     await runloop.sleep_ms(100)
+
 
 async def main():
     global g_yaw
     g_yaw = 0
     motor_pair.pair(motor_pair.PAIR_1, port.A, port.B)
     await straight(300, 500, 1)
-    await turn(Direction.LEFT, 380,100)
-    await turn(Direction.RIGHT, 390,100)
+    await turn(Direction.LEFT, 380, 100)
+    await turn(Direction.RIGHT, 390, 100)
     """
     await straight(300, 500, 1)
     await turn(Direction.LEFT, 20,100)
