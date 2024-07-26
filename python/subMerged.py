@@ -1,9 +1,10 @@
+from asyncio import sleep
 from hub import port
 from hub import motion_sensor
 import motor
 import runloop
 import motor_pair
-import asyncio
+import time
 
 # left motor is connected to port A and right motor is connected to port B
 
@@ -21,9 +22,9 @@ Get drift gives how much you are drifted from your tgt_yaw angle.
 """
 def get_drift(tgt_yaw):
     c_yaw = get_yaw()
-    # When robot is close to 360, it can drift to 2 or drift to 359 
+    # When robot is close to 360, it can drift to 2 or drift to 359
     # This will take into consideration all the cases.
-    if tgt_yaw > 270 and c_yaw < 90:   #This condition is when your target yaw is in Q4 and Current yaw is in Q1
+    if tgt_yaw > 270 and c_yaw < 90:#This condition is when your target yaw is in Q4 and Current yaw is in Q1
         drift = 360 - tgt_yaw + c_yaw
     else:
         drift = c_yaw - tgt_yaw
@@ -46,7 +47,7 @@ def get_yaw() -> int:
 """
 Give the angle difference between current yaw and target yaw
 There are 4 Cases Here:
-    1. When turnnig Right and When current yaw is 350 and Target yaw is 30 
+    1. When turnnig Right and When current yaw is 350 and Target yaw is 30
     2. When turning Left and When current yaw is 10 and Target yaw is 350
     3. When turning Right and When target yaw is 90 and current yaw is 30
     4. When turning Left and When target yaw is 270 and current yaw is 350
@@ -78,8 +79,10 @@ async def straight(speed :int , distance :int, direction):
     while distance > abs(motor.relative_position(port.B)):
         # sets the return value of the tuple to a tuple, so we can pull a specific value from it
         drift = get_drift(tgtYaw)
-        motor_pair.move(motor_pair.PAIR_1, drift * -1,
-                        velocity=speed * direction, acceleration=500)
+        if direction == Direction.BACKWARD:
+            motor_pair.move(motor_pair.PAIR_1, drift, velocity = speed * -1, acceleration = 500)
+        else:
+            motor_pair.move(motor_pair.PAIR_1, drift * -1, velocity = speed, acceleration = 500)
 
     # stops the motors after they are out of the while loop
     motor_pair.stop(motor_pair.PAIR_1)
@@ -112,30 +115,41 @@ async def turn(direction, degrees, speed):
             motor.run(port.B, speed)
 
     motor_pair.stop(motor_pair.PAIR_1, stop=motor.SMART_BRAKE)
-    g_yaw = tgtYaw  # Save the target yaw into our Global yaw.
+    g_yaw = tgtYaw# Save the target yaw into our Global yaw.
     await runloop.sleep_ms(100)
 
 
 async def main():
     global g_yaw
     g_yaw = 0
+    motion_sensor.reset_yaw(0)
     motor_pair.pair(motor_pair.PAIR_1, port.A, port.B)
-    await straight(300, 500, 1)
+    await straight(1000, 1000, Direction.BACKWARD)
     await turn(Direction.LEFT, 380, 100)
     await turn(Direction.RIGHT, 390, 100)
-    """
-    await straight(300, 500, 1)
+    await straight(300, 500, Direction.BACKWARD)
     await turn(Direction.LEFT, 20,100)
-    await straight(300, 500, 1)
+    await straight(300, 500, Direction.BACKWARD)
     await turn(Direction.LEFT, 350,100)
-    await straight(300, 500, 1)
-   
+    await runloop.sleep_ms(2000)
+    await straight(300, 500, Direction.BACKWARD)
     await turn(Direction.RIGHT, 350, 100)
-    await straight(300, 500, 1)
+    await straight(300, 500, Direction.BACKWARD)
     await turn(Direction.RIGHT, 20, 100)
-"""
-
-    print(get_yaw())
+    await straight(300, 700, Direction.BACKWARD)
+    await straight(1000, 1000, Direction.FORWARD)
+    await turn(Direction.LEFT, 380, 100)
+    await turn(Direction.RIGHT, 390, 100)
+    await straight(300, 500, Direction.FORWARD)
+    await turn(Direction.LEFT, 20,100)
+    await straight(300, 500, Direction.FORWARD)
+    await turn(Direction.LEFT, 350,100)
+    await runloop.sleep_ms(2000)
+    await straight(300, 500, Direction.FORWARD)
+    await turn(Direction.RIGHT, 350, 100)
+    await straight(300, 500, Direction.FORWARD)
+    await turn(Direction.RIGHT, 20, 100)
+    await straight(300, 700, Direction.FORWARD)
 
 # This is the starting point
 runloop.run(main())
