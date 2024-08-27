@@ -4,7 +4,7 @@ from hub import motion_sensor
 import motor
 import runloop
 import motor_pair
-import time
+import asyncio
 
 # left motor is connected to port A and right motor is connected to port B
 
@@ -17,9 +17,9 @@ class Direction:
     UP = 1
     DOWN = -1
 
-"""
-Get drift gives how much you are drifted from your tgt_yaw angle.
-"""
+
+#Get drift gives how much you are drifted from your tgt_yaw angle.
+
 def get_drift(tgt_yaw):
     c_yaw = get_yaw()
     # When robot is close to 360, it can drift to 2 or drift to 359
@@ -71,7 +71,6 @@ Takes straight
 async def straight(speed :int , distance :int, direction):
     global g_yaw
     tgtYaw = g_yaw
-    # Pair motors on port A and port B
     # resets the relative position of one of the wheels
     motor.reset_relative_position(port.B, 0)
     drift = get_drift(tgtYaw)
@@ -97,11 +96,12 @@ speed: speed at which to turn
 """
 
 
-async def turn(direction, degrees, speed):
+async def turn(direction, degrees, speed, error=0.0):
     global g_yaw
     tgtYaw = g_yaw
-
+    
     if direction == Direction.RIGHT:
+        tgtYaw = (g_yaw + degrees) % 360
         while angleDiff(tgtYaw) > 0:
             tgtYaw = (g_yaw + degrees) % 360
             # We need to turn both wheels backwards to turn Right
@@ -123,33 +123,22 @@ async def main():
     global g_yaw
     g_yaw = 0
     motion_sensor.reset_yaw(0)
-    motor_pair.pair(motor_pair.PAIR_1, port.A, port.B)
-    await straight(1000, 1000, Direction.BACKWARD)
-    await turn(Direction.LEFT, 380, 100)
-    await turn(Direction.RIGHT, 390, 100)
-    await straight(300, 500, Direction.BACKWARD)
-    await turn(Direction.LEFT, 20,100)
-    await straight(300, 500, Direction.BACKWARD)
-    await turn(Direction.LEFT, 350,100)
-    await runloop.sleep_ms(2000)
-    await straight(300, 500, Direction.BACKWARD)
-    await turn(Direction.RIGHT, 350, 100)
-    await straight(300, 500, Direction.BACKWARD)
-    await turn(Direction.RIGHT, 20, 100)
-    await straight(300, 700, Direction.BACKWARD)
-    await straight(1000, 1000, Direction.FORWARD)
-    await turn(Direction.LEFT, 380, 100)
-    await turn(Direction.RIGHT, 390, 100)
-    await straight(300, 500, Direction.FORWARD)
-    await turn(Direction.LEFT, 20,100)
-    await straight(300, 500, Direction.FORWARD)
-    await turn(Direction.LEFT, 350,100)
-    await runloop.sleep_ms(2000)
-    await straight(300, 500, Direction.FORWARD)
-    await turn(Direction.RIGHT, 350, 100)
-    await straight(300, 500, Direction.FORWARD)
-    await turn(Direction.RIGHT, 20, 100)
-    await straight(300, 700, Direction.FORWARD)
-
+    motor_pair.pair(motor_pair.PAIR_1, port.B, port.A)
+    await straight(500, 875, 1)
+    await turn(Direction.LEFT, 45, 100, 0.6)
+    await straight(500, 900, Direction.FORWARD)
+    await turn(Direction.LEFT, 45, 100, 0.6)
+    await straight(500, 1850, Direction.FORWARD)
+    await turn(Direction.RIGHT, 30, 100, 0.6)
+    await straight(500, 300, Direction.FORWARD)
+    await straight(500, 200, Direction.BACKWARD)
+    await turn(Direction.LEFT, 100, 100, 0.6)
+    await straight(500, 1000, Direction.FORWARD)
+    await turn(Direction.LEFT, 110, 100, 0.6)
+    await straight(1000,3000, Direction.FORWARD)
+    await turn(Direction.RIGHT, 45, 100, 0.6)
+    await straight(500, 875, Direction.BACKWARD)
+    await straight(500, 875, Direction.FORWARD)
 # This is the starting point
 runloop.run(main())
+
