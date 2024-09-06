@@ -119,26 +119,23 @@ async def turn(direction, degrees, speed, error=0.0):
     await runloop.sleep_ms(100)
 
 
+async def Run_2():
+    await straight (350, 460, Direction.FORWARD)  #We start sideways
+    await turn (Direction.RIGHT, 38, 110)
+    await straight (350, 1400, Direction.FORWARD)
+    await turn (Direction.RIGHT, 52, 110)
+    await straight (350, 135, Direction.FORWARD)
+    await straight (350, 135, Direction.BACKWARD)
+    await turn (Direction.LEFT, 49, 110)
+    await straight (475, 800, Direction.FORWARD)
+    await turn (Direction.RIGHT, 27, 110)
+    await straight (350, 135, Direction.FORWARD)
+    await motor.run_for_degrees(port.D, -300, 150)
+    await turn (Direction.LEFT, 45, 110)
 async def main():
     global g_yaw
     g_yaw = 0
     motion_sensor.reset_yaw(0)
     motor_pair.pair(motor_pair.PAIR_1, port.B, port.A)
-    await straight(500, 875, 1)
-    await turn(Direction.LEFT, 45, 100, 0.6)
-    await straight(500, 900, Direction.FORWARD)
-    await turn(Direction.LEFT, 45, 100, 0.6)
-    await straight(500, 1850, Direction.FORWARD)
-    await turn(Direction.RIGHT, 30, 100, 0.6)
-    await straight(500, 300, Direction.FORWARD)
-    await straight(500, 200, Direction.BACKWARD)
-    await turn(Direction.LEFT, 100, 100, 0.6)
-    await straight(500, 1000, Direction.FORWARD)
-    await turn(Direction.LEFT, 110, 100, 0.6)
-    await straight(1000,3000, Direction.FORWARD)
-    await turn(Direction.RIGHT, 45, 100, 0.6)
-    await straight(500, 875, Direction.BACKWARD)
-    await straight(500, 875, Direction.FORWARD)
-# This is the starting point
+    await Run_2()
 runloop.run(main())
-
