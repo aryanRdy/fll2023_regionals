@@ -19,7 +19,7 @@ class Direction:
 
 class WorkerMotor:
     LEFT = port.D
-    RIGHT = port.C
+    RIGHT = port.F
 
 
 #Get drift gives how much you are drifted from your tgt_yaw angle.
@@ -101,7 +101,7 @@ speed: speed at which to turn
 async def turn(direction: int, degrees: int, speed: int):
     global g_yaw
     tgtYaw = g_yaw
-    
+
     if direction == Direction.RIGHT:
         tgtYaw = (g_yaw + degrees) % 360
         while angleDiff(tgtYaw) > 0:
@@ -122,7 +122,7 @@ async def turn(direction: int, degrees: int, speed: int):
 
 """
 workerMotor is AttachMotor.LEFT or AttachMotor.RIGHT
-direction is Direction.UP, Direction.RIGHT, Direction.FORWARD all equal to 1 
+direction is Direction.UP, Direction.RIGHT, Direction.FORWARD all equal to 1
 And the others -1
 degrees to turn
 speed with which the motor should turn.
@@ -138,29 +138,28 @@ async def attachmentMotor_async(workerMotor: int, degrees: int, speed: int, dir:
 
 async def Run_2():
     attachmentMotor(WorkerMotor.LEFT, 300, 150, Direction.LEFT)
-    await straight (350, 460, Direction.FORWARD)  # We start sideways
+    attachmentMotor(WorkerMotor.RIGHT, 300, 150, Direction.LEFT)
+    await straight (350, 460, Direction.FORWARD)# We start sideways
     await turn (Direction.RIGHT, 38, 110)
     await straight (350, 1400, Direction.FORWARD)
     await turn (Direction.RIGHT, 52, 110)
-    await straight (350, 135, Direction.FORWARD)   # Drop of Red Squid
-    await straight (350, 130, Direction.BACKWARD)  # Backup
-    await turn (Direction.LEFT, 49, 110)
+    await straight (350, 135, Direction.FORWARD)# Drop of Red Squid
+    await straight (350, 110, Direction.BACKWARD)# Backup
+    await turn (Direction.LEFT, 49, 110)# Angler fish mission
     attachmentMotor(WorkerMotor.LEFT, 300, 150, Direction.RIGHT)
-    await straight (600, 800, Direction.FORWARD)   # Pushing the fish inside
+    await straight (600, 800, Direction.FORWARD)# Angler fish mission
     await turn (Direction.RIGHT, 27, 110)
-    await straight (350, 135, Direction.FORWARD)   # Go straight to pick up the Sea weed
-    await motor.run_for_degrees(port.D, -300, 150) # This will pick up the sea weed
+    await straight (350, 130, Direction.FORWARD)# Go straight to pick up the Sea bed sample
+    await motor.run_for_degrees(port.D, -300, 150) # This will pick up the sea bed sample
     await straight (350, 10, Direction.FORWARD)
     await turn (Direction.LEFT, 68, 110)
-    await straight (450, 400, Direction.FORWARD)
-    await attachmentMotor_async(WorkerMotor.LEFT, 550, 400, Direction.RIGHT)
-    await attachmentMotor_async(WorkerMotor.LEFT, 450, 400, Direction.LEFT)
-    await turn (Direction.LEFT, 3, 110)
+    await straight (450, 410, Direction.FORWARD)
+    await attachmentMotor_async(WorkerMotor.RIGHT, 550, 400, Direction.RIGHT)# Coral nursery
+    await attachmentMotor_async(WorkerMotor.RIGHT, 450, 400, Direction.LEFT)# Coral nursery
+    await turn (Direction.LEFT, 8, 110)
     await straight (450, 600, Direction.FORWARD)
-    await straight (300, 75, Direction.BACKWARD)
-    await turn (Direction.LEFT, 30, 110)
-    await attachmentMotor_async(WorkerMotor.LEFT, 400, 400, Direction.RIGHT)
-    await attachmentMotor_async(WorkerMotor.LEFT, 400, 400, Direction.LEFT)
+    await attachmentMotor_async(WorkerMotor.RIGHT, 550, 450, Direction.RIGHT)
+    await attachmentMotor_async(WorkerMotor.RIGHT, 400, 400, Direction.LEFT)
 
 
 async def main():
