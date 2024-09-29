@@ -7,6 +7,7 @@ import motor_pair
 import asyncio
 
 # left motor is connected to port A and right motor is connected to port B
+# right E
 
 # Aliases for Going Left right back and forward
 class Direction:
@@ -16,10 +17,6 @@ class Direction:
     RIGHT = 1
     UP = 1
     DOWN = -1
-
-class WorkerMotor:
-    LEFT = port.D
-    RIGHT = port.C
 
 
 #Get drift gives how much you are drifted from your tgt_yaw angle.
@@ -72,7 +69,7 @@ def angleDiff(tgt_yaw):
 """
 Takes straight
 """
-async def straight(speed :int , distance :int, direction: int):
+async def straight(speed :int , distance :int, direction):
     global g_yaw
     tgtYaw = g_yaw
     # resets the relative position of one of the wheels
@@ -87,6 +84,7 @@ async def straight(speed :int , distance :int, direction: int):
         else:
             motor_pair.move(motor_pair.PAIR_1, drift * -1, velocity = speed, acceleration = 500)
 
+
     # stops the motors after they are out of the while loop
     motor_pair.stop(motor_pair.PAIR_1)
 
@@ -98,10 +96,12 @@ direction is Direction.RIGHT or Direction.LEFT
 degrees: Amount of degrees to turn
 speed: speed at which to turn
 """
-async def turn(direction: int, degrees: int, speed: int):
+
+
+async def turn(direction, degrees, speed, error=0.0):
     global g_yaw
     tgtYaw = g_yaw
-    
+
     if direction == Direction.RIGHT:
         tgtYaw = (g_yaw + degrees) % 360
         while angleDiff(tgtYaw) > 0:
@@ -120,54 +120,47 @@ async def turn(direction: int, degrees: int, speed: int):
     g_yaw = tgtYaw# Save the target yaw into our Global yaw.
     await runloop.sleep_ms(100)
 
-"""
-workerMotor is AttachMotor.LEFT or AttachMotor.RIGHT
-direction is Direction.UP, Direction.RIGHT, Direction.FORWARD all equal to 1 
-And the others -1
-degrees to turn
-speed with which the motor should turn.
-
-"""
-# This function will not wait until the Lift action is performed
-def attachmentMotor(workerMotor: int, degrees: int, speed: int, dir: int):
-    motor.run_for_degrees(workerMotor, degrees * dir, speed)
-
-# This function will wait until the Lift action is performed
-async def attachmentMotor_async(workerMotor: int, degrees: int, speed: int, dir: int):
-    await motor.run_for_degrees(workerMotor, degrees * dir, speed)
-
-async def Run_2():
-    attachmentMotor(WorkerMotor.LEFT, 300, 150, Direction.LEFT)
-    await straight (350, 460, Direction.FORWARD)  # We start sideways
-    await turn (Direction.RIGHT, 38, 110)
-    await straight (350, 1400, Direction.FORWARD)
-    await turn (Direction.RIGHT, 52, 110)
-    await straight (350, 135, Direction.FORWARD)   # Drop of Red Squid
-    await straight (350, 130, Direction.BACKWARD)  # Backup
-    await turn (Direction.LEFT, 49, 110)
-    attachmentMotor(WorkerMotor.LEFT, 300, 150, Direction.RIGHT)
-    await straight (600, 800, Direction.FORWARD)   # Pushing the fish inside
-    await turn (Direction.RIGHT, 27, 110)
-    await straight (350, 135, Direction.FORWARD)   # Go straight to pick up the Sea weed
-    await motor.run_for_degrees(port.D, -300, 150) # This will pick up the sea weed
-    await straight (350, 10, Direction.FORWARD)
-    await turn (Direction.LEFT, 68, 110)
-    await straight (450, 400, Direction.FORWARD)
-    await attachmentMotor_async(WorkerMotor.LEFT, 550, 400, Direction.RIGHT)
-    await attachmentMotor_async(WorkerMotor.LEFT, 450, 400, Direction.LEFT)
-    await turn (Direction.LEFT, 3, 110)
-    await straight (450, 600, Direction.FORWARD)
-    await straight (300, 75, Direction.BACKWARD)
-    await turn (Direction.LEFT, 30, 110)
-    await attachmentMotor_async(WorkerMotor.LEFT, 400, 400, Direction.RIGHT)
-    await attachmentMotor_async(WorkerMotor.LEFT, 400, 400, Direction.LEFT)
-
 
 async def main():
+
+
+    ### Contribution from Aarav for his mission (15)
     global g_yaw
     g_yaw = 0
     motion_sensor.reset_yaw(0)
-    motor_pair.pair(motor_pair.PAIR_1, port.B, port.A)
-    await Run_2()
+    motor_pair.pair(motor_pair.PAIR_1, port.A, port.B)
+# straight(speed :int , distance :int, direction):
+# turn(direction, degrees, speed, error=0.0): 
+   
+    await straight(800, 1100, Direction.BACKWARD)#start moving
+    await turn(Direction.RIGHT, 90, 100, 0.6)# take first turn
+    await straight(800, 65, Direction.BACKWARD)# got toward the boat
+   # await turn(Direction.RIGHT, 90, 100)   
+    await motor.run_for_degrees(port.D, 2300, 4000)#Drop the stuff
+    await motor.run_for_degrees(port.D, -2300, 4000)#w move te box up
+    await straight(400, 65, Direction.BACKWARD)
+   # await straight(800, 200, Direction.FORWARD)
+    await turn(Direction.LEFT,90, 100, 0.5)
+    await straight(600, 400, Direction.BACKWARD)
+    #await turn(Direction.LEFT, 20, 200, 0.6)
+    print("driving straight")
+    await straight(300, 150, Direction.FORWARD)
+    await turn(Direction.LEFT, 90, 100, 0.6)
+    await straight(200, 400, Direction.FORWARD)
+    await turn(Direction.LEFT, 90, 100, 0.6)
+    #await turn(Direction.LEFT, 55, 10, 0.5)
+    await straight(800, 900, Direction.FORWARD)
+  #  await straight(800, 1000, Direction.FORWARD)
+# code for robot to come back
+    await straight(800, 500, Direction.BACKWARD)
+    await turn(Direction.RIGHT, 30, 100, 0.5)
+    await straight(800, 1000, Direction.BACKWARD)
+    await turn(Direction.LEFT, 30, 300, 0.5)
+    await straight(800, 900, Direction.BACKWARD)
+
+    #await straight(500, 100, Direction.BACKWARD)
+    #await straight(500, 100, Direction.BACKWARD)
+
+# This is the starting point
 
 runloop.run(main())
