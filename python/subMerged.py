@@ -120,16 +120,8 @@ async def turn(direction, degrees, speed, error=0.0):
     g_yaw = tgtYaw# Save the target yaw into our Global yaw.
     await runloop.sleep_ms(100)
 
-
-async def main():
-
-
-    ### Contribution from Aarav for his mission (15)
-    global g_yaw
-    g_yaw = 0
-    motion_sensor.reset_yaw(0)
-    motor_pair.pair(motor_pair.PAIR_1, port.A, port.B)
-# straight(speed :int , distance :int, direction):
+async def aarav():
+    # straight(speed :int , distance :int, direction):
 # turn(direction, degrees, speed, error=0.0): 
    
     await straight(800, 1100, Direction.BACKWARD)#start moving
@@ -161,6 +153,13 @@ async def main():
     #await straight(500, 100, Direction.BACKWARD)
     #await straight(500, 100, Direction.BACKWARD)
 
-# This is the starting point
+async def main():
+
+    ### Contribution from Aarav for his mission (15)
+    global g_yaw
+    g_yaw = 0
+    motion_sensor.reset_yaw(0)
+    motor_pair.pair(motor_pair.PAIR_1, port.A, port.B)
+    await aarav()
 
 runloop.run(main())
