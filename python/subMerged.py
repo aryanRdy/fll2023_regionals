@@ -77,9 +77,9 @@ def angleDiff(tgt_yaw):
     return cur_yaw - tgt_yaw
 
 
-"""
-Takes straight
-"""
+
+#Takes straight
+
 
 
 async def straight(speed: int, distance: int, direction: int):
@@ -102,7 +102,7 @@ async def straight(speed: int, distance: int, direction: int):
     # stops the motors after they are out of the while loop
     motor_pair.stop(motor_pair.PAIR_1)
 
-    await runloop.sleep_ms(100)
+    await runloop.sleep_ms(150)
 
 
 """
@@ -132,7 +132,7 @@ async def turn(direction: int, degrees: int, speed: int):
 
     motor_pair.stop(motor_pair.PAIR_1, stop=motor.SMART_BRAKE)
     g_yaw = tgtYaw# Save the target yaw into our Global yaw.
-    await runloop.sleep_ms(100)
+    await runloop.sleep_ms(150)
 
 """
 workerMotor is AttachMotor.LEFT or AttachMotor.RIGHT
@@ -154,7 +154,7 @@ async def attachmentMotor_async(workerMotor: int, degrees: int, speed: int, dir:
     await motor.run_for_degrees(workerMotor, degrees * dir, speed)
 
 
-async def Run_2():
+async def Run_2_reverted():
     attachmentMotor(WorkerMotor.LEFT, 300, 150, Direction.LEFT)
     attachmentMotor(WorkerMotor.RIGHT, 300, 150, Direction.LEFT)
     await straight(350, 460, Direction.FORWARD)# We start sideways
@@ -185,11 +185,42 @@ async def Run_2():
     await turn (Direction.RIGHT, 15, 110)
     await straight (500, 50, Direction.FORWARD)
 
+
+async def Run_2():
+    attachmentMotor(WorkerMotor.LEFT, 300, 150, Direction.LEFT)
+    #attachmentMotor(WorkerMotor.RIGHT, 300, 75, Direction.LEFT)
+    await straight(350, 460, Direction.FORWARD)# We start sideways
+    await turn(Direction.RIGHT, 38, 110)
+    await straight(350, 1400, Direction.FORWARD)
+    await turn(Direction.RIGHT, 52, 110)
+    await straight(350, 135, Direction.FORWARD)# Drop of Red Squid
+    await straight(350, 110, Direction.BACKWARD)# Backup
+    await turn(Direction.LEFT, 49, 110)# Angler fish mission
+    attachmentMotor(WorkerMotor.LEFT, 300, 150, Direction.RIGHT)
+    await straight(650, 790, Direction.FORWARD) # Angler fish mission
+    await turn(Direction.RIGHT, 27, 110)
+    await straight(350, 75, Direction.FORWARD)     # Go straight to pick up the Sea bed sample
+    await motor.run_for_degrees(port.D, -300, 150) # This will pick up the sea bed sample
+    await straight(350, 75, Direction.BACKWARD)
+    await turn(Direction.LEFT, 68, 110)
+    await straight(450, 650, Direction.FORWARD)
+    await attachmentMotor_async(WorkerMotor.RIGHT, 800, 1500, Direction.RIGHT) # Coral nursery Push down
+    await attachmentMotor_async(WorkerMotor.RIGHT, 325, 75, Direction.LEFT) # Coral nursery Lift up
+    attachmentMotor(WorkerMotor.RIGHT, 75, 75, Direction.LEFT) # Coral nursery Lift up
+    await straight(285, 400, Direction.FORWARD)    # Move towards Shark
+    runloop.sleep_ms(200)
+    await attachmentMotor_async (WorkerMotor.RIGHT, 200, 1100, Direction.LEFT)
+    '''
+    await straight(450, 170, Direction.FORWARD) from the test
+    await turn (Direction. LEFT, 17, 110)
+    await straight (350, 185, Direction.FORWARD)
+    await turn (Direction.RIGHT, 17, 110)
+    await straight (150, 100, Direction.FORWARD)
+    '''
 async def main():
     global g_yaw
     g_yaw = 0
     motion_sensor.reset_yaw(0)
     motor_pair.pair(motor_pair.PAIR_1, port.B, port.A)
     await Run_2()
-
 runloop.run(main())
