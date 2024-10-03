@@ -85,6 +85,8 @@ def angleDiff(tgt_yaw):
 async def straight(speed: int, distance: int, direction: int):
     global g_yaw
     tgtYaw = g_yaw
+    minSpeed = int(0.50 * speed)
+    tgtSpeed = speed
     # resets the relative position of one of the wheels
     motor.reset_relative_position(port.B, 0)
     drift = get_drift(tgtYaw)
@@ -92,17 +94,28 @@ async def straight(speed: int, distance: int, direction: int):
     while distance > abs(motor.relative_position(port.B)):
         # sets the return value of the tuple to a tuple, so we can pull a specific value from it
         drift = get_drift(tgtYaw)
+        fractionDistLeft = 1- abs(motor.relative_position(port.B)/distance)
+        if fractionDistLeft <= 0.4:
+            tgtSpeed = int(0.8 * speed)
+        elif fractionDistLeft <= 0.3:
+            tgtSpeed = int(0.7 * speed)
+        elif fractionDistLeft <= 0.2:
+            tgtSpeed = int(0.6 * speed)
+        elif fractionDistLeft <= 0.1:
+            tgtSpeed = int(0.5 * speed)
+        else:
+            tgtSpeed = speed
         if direction == Direction.BACKWARD:
             motor_pair.move(motor_pair.PAIR_1, drift,
-                            velocity=speed * -1, acceleration=500)
+                            velocity=tgtSpeed * -1, acceleration=5000)
         else:
             motor_pair.move(motor_pair.PAIR_1, drift * -1,
-                            velocity=speed, acceleration=500)
+                            velocity=tgtSpeed, acceleration=5000)
 
     # stops the motors after they are out of the while loop
     motor_pair.stop(motor_pair.PAIR_1)
 
-    await runloop.sleep_ms(150)
+    await runloop.sleep_ms(300)
 
 
 """
@@ -110,29 +123,32 @@ direction is Direction.RIGHT or Direction.LEFT
 degrees: Amount of degrees to turn
 speed: speed at which to turn
 """
-
-
 async def turn(direction: int, degrees: int, speed: int):
     global g_yaw
     tgtYaw = g_yaw
+    tgtSpeed = speed
+    origDiff = abs(degrees - g_yaw)
+    minSpeed = 0.25 * speed # 25% of requested speed
 
     if direction == Direction.RIGHT:
         tgtYaw = (g_yaw + degrees) % 360
-        while angleDiff(tgtYaw) > 0:
-            tgtYaw = (g_yaw + degrees) % 360
+        while (agdiff := angleDiff(tgtYaw)) > 0:
+            tgtSpeed = int (max((agdiff/origDiff) * speed, minSpeed))
             # We need to turn both wheels backwards to turn Right
-            motor.run(port.A, speed * Direction.RIGHT * -1)
-            motor.run(port.B, speed * Direction.RIGHT * -1)
+            motor.run(port.A, tgtSpeed * Direction.RIGHT * -1)
+            motor.run(port.B, tgtSpeed * Direction.RIGHT * -1)
     elif direction == Direction.LEFT:
         tgtYaw = (g_yaw - degrees + 360) % 360
         # Angle diff gives us the difference between my current yaw and the target yaw
-        while angleDiff(tgtYaw) > 0:
-            motor.run(port.A, speed)
-            motor.run(port.B, speed)
+        while (agdiff := angleDiff(tgtYaw)) > 0:
+            tgtSpeed = int (max((agdiff/origDiff) * speed, minSpeed))
+            motor.run(port.A, tgtSpeed)
+            motor.run(port.B, tgtSpeed)
 
     motor_pair.stop(motor_pair.PAIR_1, stop=motor.SMART_BRAKE)
-    g_yaw = tgtYaw# Save the target yaw into our Global yaw.
-    await runloop.sleep_ms(150)
+    g_yaw = tgtYaw # Save the target yaw into our Global yaw.
+    await runloop.sleep_ms(300)
+
 
 """
 workerMotor is AttachMotor.LEFT or AttachMotor.RIGHT
@@ -204,14 +220,17 @@ async def Run_2():
     await straight(350, 75, Direction.BACKWARD)
     await turn(Direction.LEFT, 68, 110)
     await straight(450, 650, Direction.FORWARD)
-    await attachmentMotor_async(WorkerMotor.RIGHT, 800, 1500, Direction.RIGHT) # Coral nursery Push down
-    await attachmentMotor_async(WorkerMotor.RIGHT, 325, 75, Direction.LEFT) # Coral nursery Lift up
-    attachmentMotor(WorkerMotor.RIGHT, 75, 75, Direction.LEFT) # Coral nursery Lift up
-    await straight(285, 400, Direction.FORWARD)    # Move towards Shark
+    attachmentMotor (WorkerMotor.LEFT, 65, 120, Direction.RIGHT) # Get ready to pick up the scuba diver
+    await attachmentMotor_async(WorkerMotor.RIGHT, 800, 2000, Direction.RIGHT) # Coral nursery Push down
+    await attachmentMotor_async(WorkerMotor.RIGHT, 100, 200, Direction.LEFT) # Coral nursery Lift up
+    attachmentMotor(WorkerMotor.RIGHT, 300, 350, Direction.LEFT) # Coral nursery Lift up
+    await straight(285, 371, Direction.FORWARD)    # Move towards Shark
     runloop.sleep_ms(200)
-    await attachmentMotor_async (WorkerMotor.RIGHT, 200, 1100, Direction.LEFT)
+    await attachmentMotor_async (WorkerMotor.RIGHT, 600, 2000, Direction.RIGHT)
+    await attachmentMotor_async (WorkerMotor.LEFT, 65, 300, Direction.LEFT)
+    #await straight (300, 100, Direction.BACKWARD)
     '''
-    await straight(450, 170, Direction.FORWARD) from the test
+    await straight(450, 170, Direction.FORWARD) 
     await turn (Direction. LEFT, 17, 110)
     await straight (350, 185, Direction.FORWARD)
     await turn (Direction.RIGHT, 17, 110)
@@ -223,4 +242,6 @@ async def main():
     motion_sensor.reset_yaw(0)
     motor_pair.pair(motor_pair.PAIR_1, port.B, port.A)
     await Run_2()
+
+    
 runloop.run(main())
