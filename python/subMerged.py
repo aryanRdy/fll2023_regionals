@@ -118,6 +118,9 @@ async def turn(direction: int, degrees: int, speed: int, targetYaw: int = -500):
     origDiff = abs(degrees)
     minSpeed = 100
 
+    if targetYaw != -500 and targetYaw < 0:
+        targetYaw = 360 + targetYaw
+
     if direction == Direction.RIGHT:
         if targetYaw == -500:
             tgtYaw = (g_yaw + degrees) % 360
@@ -200,9 +203,9 @@ async def Run_2():
     attachmentMotor(WorkerMotor.LEFT, 300, 150, Direction.LEFT)
     #attachmentMotor(WorkerMotor.RIGHT, 300, 220, Direction.LEFT)
     await straight(350, 460, Direction.FORWARD)# We start sideways
-    await turn(Direction.RIGHT, 40, 300)
+    await turn(Direction.RIGHT, 0, 300,40)
     await straight(350, 1400, Direction.FORWARD) #Go towards dropping the Squid
-    await turn(Direction.RIGHT, 50, 300) # Turn towards Red squid drop off location
+    await turn(Direction.RIGHT, 0, 300,90) # Turn towards Red squid drop off location
     await straight(350, 135, Direction.FORWARD)# Drop of Red Squid
     await straight(350, 120, Direction.BACKWARD)# Backup
     await turn(Direction.LEFT, 50, 200)# Angler fish mission
