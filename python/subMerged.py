@@ -116,9 +116,9 @@ async def turn(direction: int, degrees: int, speed: int, targetYaw: int = -500):
     tgtYaw = g_yaw
     tgtSpeed = speed
     origDiff = abs(degrees)
-    minSpeed = 100
+    minSpeed = 75
 
-    if targetYaw != -500 and targetYaw < 0:
+    if targetYaw >= -360 and targetYaw < 0:
         targetYaw = 360 + targetYaw
 
     if direction == Direction.RIGHT:
@@ -126,6 +126,8 @@ async def turn(direction: int, degrees: int, speed: int, targetYaw: int = -500):
             tgtYaw = (g_yaw + degrees) % 360
         else:
             tgtYaw = targetYaw
+            origDiff = angleDiff(targetYaw)
+
         while (agdiff := angleDiff(tgtYaw)) > 0:
             tgtSpeed = int (max((agdiff/origDiff) * speed, minSpeed))
             # We need to turn both wheels backwards to turn Right
@@ -136,6 +138,8 @@ async def turn(direction: int, degrees: int, speed: int, targetYaw: int = -500):
             tgtYaw = (g_yaw - degrees + 360) % 360
         else:
             tgtYaw = targetYaw
+            origDiff = angleDiff(targetYaw)
+
         # Angle diff gives us the difference between my current yaw and the target yaw
         while (agdiff := angleDiff(tgtYaw)) > 0:
             tgtSpeed = int (max((agdiff/origDiff) * speed, minSpeed))
@@ -193,31 +197,31 @@ async def Run_2_reverted():
     await straight(450, 430, Direction.FORWARD)    # Move towards Shark
     await turn(Direction.LEFT, 30, 110)
     await straight(300, 100, Direction.FORWARD)
-    await attachmentMotor_async(WorkerMotor.RIGHT, 600, 1000, Direction.RIGHT)  # Hit the shark
+    await attachmentMotor_async(WorkerMotor.RIGHT, 600, 1000, Direction.RIGHT)# Hit the shark
     await attachmentMotor_async(WorkerMotor.RIGHT, 400, 400, Direction.LEFT)    # Lift up the arm
     await turn (Direction.RIGHT, 15, 110)
     await straight (500, 50, Direction.FORWARD)
 
 
 async def Run_2():
-    attachmentMotor(WorkerMotor.LEFT, 300, 150, Direction.LEFT)
+    #attachmentMotor(WorkerMotor.LEFT, 300, 150, Direction.LEFT)
     #attachmentMotor(WorkerMotor.RIGHT, 300, 220, Direction.LEFT)
     await straight(350, 460, Direction.FORWARD)# We start sideways
-    await turn(Direction.RIGHT, 0, 300,40)
+    await turn(Direction.RIGHT, 0, 300, 40)
     await straight(350, 1400, Direction.FORWARD) #Go towards dropping the Squid
-    await turn(Direction.RIGHT, 0, 300,90) # Turn towards Red squid drop off location
+    await turn(Direction.RIGHT, 0, 300, 90) # Turn towards Red squid drop off location
     await straight(350, 135, Direction.FORWARD)# Drop of Red Squid
-    await straight(350, 120, Direction.BACKWARD)# Backup
-    await turn(Direction.LEFT, 50, 200)# Angler fish mission
+    await straight(350, 135, Direction.BACKWARD)# Backup
+    await turn(Direction.LEFT, 0, 200, 40)# Angler fish mission
     attachmentMotor(WorkerMotor.LEFT, 300, 150, Direction.RIGHT)
-    await straight(650, 790, Direction.FORWARD) # Angler fish mission
-    await turn(Direction.RIGHT, 27, 200)
-    await straight(350, 75, Direction.FORWARD)     # Go straight to pick up the Sea bed sample
+    await straight(800, 790, Direction.FORWARD) # Angler fish mission 650
+    await turn(Direction.RIGHT, 0, 200, 70)
+    await straight(350, 75, Direction.FORWARD)    # Go straight to pick up the Sea bed sample
     await motor.run_for_degrees(port.D, -300, 150) # This will pick up the sea bed sample
-    await straight(350, 25, Direction.BACKWARD)    # Backup a bit to after picking up the sea bed sample
-    await turn(Direction.LEFT, 68, 400)
-    await straight(450, 625, Direction.FORWARD)
-    attachmentMotor (WorkerMotor.LEFT, 65, 120, Direction.RIGHT) # Get ready to pick up the scuba diver
+    await straight(150, 45, Direction.BACKWARD)    # Backup a bit to after picking up the sea bed sample
+    await turn(Direction.LEFT, 0, 400, 0)
+    await straight(450, 615, Direction.FORWARD)  # Go towards the Coral Nursery 625
+    attachmentMotor (WorkerMotor.LEFT, 65, 120, Direction.RIGHT) 
     await attachmentMotor_async(WorkerMotor.RIGHT, 800, 2000, Direction.RIGHT) # Coral nursery Push down
     await attachmentMotor_async(WorkerMotor.RIGHT, 100, 200, Direction.LEFT) # Coral nursery Lift up
     attachmentMotor(WorkerMotor.RIGHT, 300, 350, Direction.LEFT) # Coral nursery Lift up
@@ -227,7 +231,7 @@ async def Run_2():
     await attachmentMotor_async (WorkerMotor.LEFT, 65, 300, Direction.LEFT)
     await straight (300, 100, Direction.BACKWARD)
     '''
-    await straight(450, 170, Direction.FORWARD) 
+    await straight(450, 170, Direction.FORWARD)
     await turn (Direction. LEFT, 17, 110)
     await straight (350, 185, Direction.FORWARD)
     await turn (Direction.RIGHT, 17, 110)
@@ -238,6 +242,9 @@ async def main():
     g_yaw = 0
     motion_sensor.reset_yaw(0)
     motor_pair.pair(motor_pair.PAIR_1, port.B, port.A)
+    await straight (350, 500, Direction.FORWARD)
+    await turn (Direction.RIGHT, 90, 500)
     await Run_2()
 
 runloop.run(main())
+
