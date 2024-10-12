@@ -172,6 +172,7 @@ async def attachmentMotor_async(workerMotor: int, degrees: int, speed: int, dir:
 
 
 async def Run_2():
+    attachmentMotor(WorkerMotor.LEFT, 300, 150, Direction.LEFT)
     # attachmentMotor(WorkerMotor.RIGHT, 300, 220, Direction.LEFT)
     await straight(350, 460, Direction.FORWARD)  # We start sideways
     await turn(Direction.RIGHT, 0, 300, 40)
@@ -180,10 +181,9 @@ async def Run_2():
     # Turn towards Red squid drop off location
     await turn(Direction.RIGHT, 0, 300, 90)
     await straight(350, 135, Direction.FORWARD)  # Drop of Red Squid
-    attachmentMotor(WorkerMotor.LEFT, 217, 300, Direction.LEFT)
     await straight(350, 135, Direction.BACKWARD)  # Backup
     await turn(Direction.LEFT, 0, 200, 40)  # Angler fish mission
-    attachmentMotor(WorkerMotor.LEFT, 300, 300, Direction.RIGHT)
+    attachmentMotor(WorkerMotor.LEFT, 300, 150, Direction.RIGHT)
     await straight(800, 790, Direction.FORWARD)  # Angler fish mission 650
     await turn(Direction.RIGHT, 0, 200, 70)
     # Go straight to pick up the Sea bed sample
@@ -219,6 +219,7 @@ async def main():
     g_yaw = 0
     motion_sensor.reset_yaw(0)
     motor_pair.pair(motor_pair.PAIR_1, port.B, port.A)
+
     await Run_2()
 
 runloop.run(main())
