@@ -119,28 +119,75 @@ async def turn(direction, degrees, speed, error=0.0):
     await runloop.sleep_ms(100)
 
 
+"""
+Arm function parameters: (arm, speed, degrees)
+arm is ARM.Right or ARM.Left
+"""
+
+"""async def motor(arm, speed, degrees):
+    if arm == "arm.Right":
+        motor.run_for_degrees(port.F, degrees, speed)
+    elif arm == "arm.Left":
+        motor.run_for_degrees(port.D, degrees, speed)
+    else:
+        print("ERR. ONLY EXCEPTS ARM.Right OR ARM.Left for motor() function
+"""
+
+
+
+
+
+
+async def RUN3():
+    
+    await straight(500, 550, Direction.BACKWARD) 
+    await turn(Direction.RIGHT, 45, 100, 0.6)
+    await straight(500, 350, Direction.BACKWARD)
+    await turn(Direction.RIGHT, 45, 100, 0.6) 
+    await straight(700, 800, Direction.BACKWARD)
+    await straight(300, 250, Direction.FORWARD)
+    
+    await turn(Direction.LEFT, 135, 100, 0.6)
+    #end of kracken
+
+
+    await straight(500, 1000, Direction.FORWARD)  # move towards trident mission
+    await turn(Direction.LEFT, 45, 100, 0.6)
+
+    
+
+    
+
+    
+    #Artificial Habitat
+    await straight(500, 350, Direction.FORWARD)
+    await motor.run_for_degrees(port.F, -1400, 600)
+    motor.run_for_degrees(port.F, 1100, 100)
+    await straight(100, 400, Direction.BACKWARD)
+    await straight(300, 350, Direction.BACKWARD)
+    await turn(Direction.LEFT, 45, 100, 0.6)
+    await straight(300, 500, Direction.FORWARD)
+
+    #pick up trident
+    await motor.run_for_degrees(port.D, -4000, 1100) # motor to pick up trident
+    await straight(50, 25, Direction.BACKWARD)
+    runloop.sleep_ms(5000)
+    await motor.run_for_degrees(port.D, 200, 200)
+    await motor.run_for_degrees(port.D, 200, 200)
+    await straight(500, 350, Direction.BACKWARD)
+
+    #go back home
+    await turn(Direction.RIGHT, 45, 100, 0.6)
+    await straight(700, 1000, Direction.BACKWARD)
+    
+
 async def main():
     global g_yaw
     g_yaw = 0
     motion_sensor.reset_yaw(0)
     motor_pair.pair(motor_pair.PAIR_1, port.B, port.A)
-    await straight(500, 875, 1)
-    await turn(Direction.LEFT, 45, 100, 0.6)
-    await straight(500, 900, Direction.FORWARD)
-    await turn(Direction.LEFT, 45, 100, 0.6)
-    await straight(500, 1850, Direction.FORWARD)
-    await turn(Direction.RIGHT, 30, 100, 0.6)
-    await straight(500, 300, Direction.FORWARD)
-    await straight(500, 200, Direction.BACKWARD)
-    await turn(Direction.LEFT, 100, 100, 0.6)
-    await straight(500, 1000, Direction.FORWARD)
-    await turn(Direction.LEFT, 110, 100, 0.6)
-    await straight(1000,3000, Direction.FORWARD)
-    await turn(Direction.RIGHT, 45, 100, 0.6)
-    await straight(500, 875, Direction.BACKWARD)
-    await straight(500, 875, Direction.FORWARD)
+    await RUN3()
+    
 # This is the starting point
 runloop.run(main())
-
-
 
