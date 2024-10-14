@@ -220,10 +220,10 @@ async def run_2():
 
 
 async def run_1():
-   # await straight(400,825,1)
-   # motor.run_for_degrees(port.D,300,1000) # puts the sonar discovery attachment back
-   # await turn(Direction.RIGHT,45,200) #turn towards the boat mission
-   # await straight(300,200,1)#puts attachment on boat
+    # await straight(400,825,1)
+    # motor.run_for_degrees(port.D,300,1000) # puts the sonar discovery attachment back
+    # await turn(Direction.RIGHT,45,200) #turn towards the boat mission
+    # await straight(300,200,1)#puts attachment on boat
     await straight(500, 200, 1)
     await turn(Direction.LEFT, 45, 200)
     await straight(500, 650, 1)
@@ -259,7 +259,7 @@ async def run_5():
     # attachmentMotor(WorkerMotor.LEFT, 300, 150, Direction.LEFT)
     await straight(450, 3100, Direction.FORWARD)  # Going straight
     await turn(Direction.LEFT, 0, 110, -90)  # turns
-    # await straight (450, 650, Direction.FORWARD)#goes to the mission but not purfectly in there  ###original
+    # await straight (450, 650, Direction.FORWARD)#goes to the mission but not purfectly in there###original
     # goes to the mission but not purfectly in there
     await straight(450, 630, Direction.FORWARD)
     await turn(Direction.RIGHT, 0, 110, -45)  # turns to the mission
@@ -283,7 +283,7 @@ async def run_5_2():
     # attachmentMotor(WorkerMotor.LEFT, 300, 150, Direction.LEFT)
     await straight(800, 3100, Direction.FORWARD)  # Going straight
     await turn(Direction.LEFT, 0, 110, -90)  # turns
-    # await straight (450, 650, Direction.FORWARD)  #goes to the mission but not purfectly in there###original
+    # await straight (450, 650, Direction.FORWARD)#goes to the mission but not purfectly in there###original
     # goes to the mission but not purfectly in there
     await straight(800, 630, Direction.FORWARD)
     await turn(Direction.RIGHT, 0, 200, -45)  # turns to the mission
@@ -340,14 +340,14 @@ async def main():
     while True:
         color_detected = color_sensor.color(port.C)  # Read sensor value once
         if color_detected is color.BLUE:
-            run_1()
+            await run_1()
         if color_detected is color.RED:
-            run_2()
+            await run_2()
         elif color_detected is color.GREEN:
-            run_3()
+            print("Invoke Run 3 here")
         elif color_detected is color.YELLOW:
-            run_4()
+            await run_4()
         elif color_detected is color.PURPLE:
-            run_5_2()
+            await run_5_2()
 
 runloop.run(main())
