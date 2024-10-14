@@ -246,6 +246,45 @@ async def run1():
     await turn(Direction.RIGHT,30,200)
     await straight(800,700,1)
 
+async def Run_5():
+    #attachmentMotor(WorkerMotor.LEFT, 300, 150, Direction.LEFT)
+    await straight (450, 3100, Direction.FORWARD)# Going straight
+    await turn (Direction.LEFT, 0, 110, -90)#turns
+    #await straight (450, 650, Direction.FORWARD)#goes to the mission but not purfectly in there  ###original
+    await straight (450, 630, Direction.FORWARD)#goes to the mission but not purfectly in there
+    await turn (Direction.RIGHT, 0, 110, -45)#turns to the mission
+    #await straight (450, 550, Direction.FORWARD) #goes into the whale pushy thing that makes the whales mouth open ###original
+    await straight (450, 550, Direction.FORWARD) #goes into the whale pushy thing that makes the whales mouth open
+    await attachmentMotor_async(WorkerMotor.LEFT, 1300, 400, Direction.RIGHT) # Makes the krill go into the whales mouth
+    #await attachmentMotor_async(WorkerMotor.LEFT, 1300, 400, Direction.LEFT) #Reseting can be removed later
+    ### Run for Last Mission
+    await straight (350, 700, Direction.BACKWARD) #Backup from Whale
+    await turn (Direction.LEFT, 92, 98) #Change Direction 
+    await straight (320, 880, Direction.FORWARD) #Head to Final Station
+    #await straight (320, 150, Direction.FORWARD)
+    #attachmentMotor(WorkerMotor.RIGHT, 320, 150, Direction.LEFT) #Make the bar go up
+    await straight (320, 200 , Direction.BACKWARD) #Need this backward to help the bar
+
+async def Run_5_2():
+    #attachmentMotor(WorkerMotor.LEFT, 300, 150, Direction.LEFT)
+    await straight (800, 3100, Direction.FORWARD)# Going straight
+    await turn (Direction.LEFT, 0, 110, -90)#turns
+    #await straight (450, 650, Direction.FORWARD)#goes to the mission but not purfectly in there###original
+    await straight (800, 630, Direction.FORWARD)#goes to the mission but not purfectly in there
+    await turn (Direction.RIGHT, 0, 200, -45)#turns to the mission
+    #await straight (450, 550, Direction.FORWARD) #goes into the whale pushy thing that makes the whales mouth open ###original
+    await straight (500, 515, Direction.FORWARD) #goes into the whale pushy thing that makes the whales mouth open
+    await attachmentMotor_async(WorkerMotor.LEFT, 1350, 450, Direction.RIGHT) # Makes the krill go into the whales mouth
+    #await attachmentMotor_async(WorkerMotor.LEFT, 1300, 400, Direction.LEFT) #Reseting can be removed later
+    ### Run for Last Mission
+    await straight (800, 690, Direction.BACKWARD) #Backup from Whale
+    await turn (Direction.LEFT, 91, 200) #Change Direction
+    await straight (500, 860, Direction.FORWARD) #Head to Final Station
+    #await straight (320, 150, Direction.FORWARD)
+    #attachmentMotor(WorkerMotor.RIGHT, 320, 150, Direction.LEFT) #Make the bar go up
+    await straight (320, 200 , Direction.BACKWARD) #Need this backward to help the bar
+
+
 async def main():
     global g_yaw
     g_yaw = 0
@@ -255,3 +294,4 @@ async def main():
     await Run_2()
 
 runloop.run(main())
+
