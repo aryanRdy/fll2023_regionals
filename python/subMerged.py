@@ -307,7 +307,7 @@ async def run_4():
     await straight(800, 1100, Direction.BACKWARD)  # start moving
     await turn(Direction.RIGHT, 90, 100, 0.6)  # take first turn
     await straight(800, 65, Direction.BACKWARD)  # got toward the boat
-# await turn(Direction.RIGHT, 90, 100)
+    # await turn(Direction.RIGHT, 90, 100)
     await motor.run_for_degrees(port.D, 2300, 4000)  # Drop the stuff
     await motor.run_for_degrees(port.D, -2300, 4000)  # w move te box up
     await straight(400, 65, Direction.BACKWARD)
@@ -322,8 +322,8 @@ async def run_4():
     await turn(Direction.LEFT, 90, 100, 0.6)
     # await turn(Direction.LEFT, 55, 10, 0.5)
     await straight(800, 900, Direction.FORWARD)  # 600
-# await straight(800, 1000, Direction.FORWARD)
-# code for robot to come back
+    # await straight(800, 1000, Direction.FORWARD)
+    # code for robot to come back
     await straight(800, 500, Direction.BACKWARD)
     await turn(Direction.RIGHT, 30, 100, 0.5)
     await straight(800, 1000, Direction.BACKWARD)
