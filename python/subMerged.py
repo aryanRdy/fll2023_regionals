@@ -172,7 +172,7 @@ async def attachmentMotor_async(workerMotor: int, degrees: int, speed: int, dir:
     await motor.run_for_degrees(workerMotor, degrees * dir, speed)
 
 
-async def Run_2():
+async def run_2():
     # attachmentMotor(WorkerMotor.LEFT, 300, 150, Direction.LEFT)
     # attachmentMotor(WorkerMotor.RIGHT, 300, 220, Direction.LEFT)
     await straight(350, 460, Direction.FORWARD)  # We start sideways
@@ -219,7 +219,7 @@ async def Run_2():
     await straight(800, 1680, Direction.FORWARD)  # Drive to Home
 
 
-async def run1():
+async def run_1():
    # await straight(400,825,1)
    # motor.run_for_degrees(port.D,300,1000) # puts the sonar discovery attachment back
    # await turn(Direction.RIGHT,45,200) #turn towards the boat mission
@@ -255,7 +255,7 @@ async def run1():
     await straight(800, 700, 1)
 
 
-async def Run_5():
+async def run_5():
     # attachmentMotor(WorkerMotor.LEFT, 300, 150, Direction.LEFT)
     await straight(450, 3100, Direction.FORWARD)  # Going straight
     await turn(Direction.LEFT, 0, 110, -90)  # turns
@@ -279,7 +279,7 @@ async def Run_5():
     await straight(320, 200, Direction.BACKWARD)
 
 
-async def Run_5_2():
+async def run_5_2():
     # attachmentMotor(WorkerMotor.LEFT, 300, 150, Direction.LEFT)
     await straight(800, 3100, Direction.FORWARD)  # Going straight
     await turn(Direction.LEFT, 0, 110, -90)  # turns
@@ -302,35 +302,34 @@ async def Run_5_2():
     # Need this backward to help the bar
     await straight(320, 200, Direction.BACKWARD)
 
-async def run_4():
-    # straight(speed :int , distance :int, direction):
-# turn(direction, degrees, speed, error=0.0):
 
-    await straight(800, 1100, Direction.BACKWARD)#start moving
-    await turn(Direction.RIGHT, 90, 100, 0.6)# take first turn
-    await straight(800, 65, Direction.BACKWARD)# got toward the boat
-# await turn(Direction.RIGHT, 90, 100)
-    await motor.run_for_degrees(port.D, 2300, 4000)#Drop the stuff
-    await motor.run_for_degrees(port.D, -2300, 4000)#w move te box up
+async def run_4():
+    await straight(800, 1100, Direction.BACKWARD)  # start moving
+    await turn(Direction.RIGHT, 90, 100, 0.6)  # take first turn
+    await straight(800, 65, Direction.BACKWARD)  # got toward the boat
+    # await turn(Direction.RIGHT, 90, 100)
+    await motor.run_for_degrees(port.D, 2300, 4000)  # Drop the stuff
+    await motor.run_for_degrees(port.D, -2300, 4000)  # w move te box up
     await straight(400, 65, Direction.BACKWARD)
-# await straight(800, 200, Direction.FORWARD)
-    await turn(Direction.LEFT,90, 100, 0.5)
+    # await straight(800, 200, Direction.FORWARD)
+    await turn(Direction.LEFT, 90, 100, 0.5)
     await straight(600, 400, Direction.BACKWARD)
-    #await turn(Direction.LEFT, 20, 200, 0.6)
+    # await turn(Direction.LEFT, 20, 200, 0.6)
     print("driving straight")
     await straight(300, 150, Direction.FORWARD)
     await turn(Direction.LEFT, 90, 100, 0.6)
     await straight(200, 400, Direction.FORWARD)
     await turn(Direction.LEFT, 90, 100, 0.6)
-    #await turn(Direction.LEFT, 55, 10, 0.5)
-    await straight(800, 900, Direction.FORWARD)# 600
-#await straight(800, 1000, Direction.FORWARD)
-# code for robot to come back
+    # await turn(Direction.LEFT, 55, 10, 0.5)
+    await straight(800, 900, Direction.FORWARD)  # 600
+    # await straight(800, 1000, Direction.FORWARD)
+    # code for robot to come back
     await straight(800, 500, Direction.BACKWARD)
     await turn(Direction.RIGHT, 30, 100, 0.5)
     await straight(800, 1000, Direction.BACKWARD)
     await turn(Direction.LEFT, 30, 300, 0.5)
     await straight(500, 800, Direction.BACKWARD)
+
 
 async def main():
     global g_yaw
@@ -341,16 +340,14 @@ async def main():
     while True:
         color_detected = color_sensor.color(port.C)  # Read sensor value once
         if color_detected is color.BLUE:
-            print("Run 1")
+            run_1()
         if color_detected is color.RED:
-            print("Run 2")
+            run_2()
         elif color_detected is color.GREEN:
-            print("Run 3")
+            run_3()
         elif color_detected is color.YELLOW:
-            print("run 4")
+            run_4()
         elif color_detected is color.PURPLE:
-            print("Run 5")
-    await run1()
-    await Run_2()
+            run_5_2()
 
 runloop.run(main())
