@@ -302,6 +302,35 @@ async def Run_5_2():
     # Need this backward to help the bar
     await straight(320, 200, Direction.BACKWARD)
 
+async def run_4():
+    # straight(speed :int , distance :int, direction):
+# turn(direction, degrees, speed, error=0.0):
+
+    await straight(800, 1100, Direction.BACKWARD)#start moving
+    await turn(Direction.RIGHT, 90, 100, 0.6)# take first turn
+    await straight(800, 65, Direction.BACKWARD)# got toward the boat
+# await turn(Direction.RIGHT, 90, 100)
+    await motor.run_for_degrees(port.D, 2300, 4000)#Drop the stuff
+    await motor.run_for_degrees(port.D, -2300, 4000)#w move te box up
+    await straight(400, 65, Direction.BACKWARD)
+# await straight(800, 200, Direction.FORWARD)
+    await turn(Direction.LEFT,90, 100, 0.5)
+    await straight(600, 400, Direction.BACKWARD)
+    #await turn(Direction.LEFT, 20, 200, 0.6)
+    print("driving straight")
+    await straight(300, 150, Direction.FORWARD)
+    await turn(Direction.LEFT, 90, 100, 0.6)
+    await straight(200, 400, Direction.FORWARD)
+    await turn(Direction.LEFT, 90, 100, 0.6)
+    #await turn(Direction.LEFT, 55, 10, 0.5)
+    await straight(800, 900, Direction.FORWARD)# 600
+#await straight(800, 1000, Direction.FORWARD)
+# code for robot to come back
+    await straight(800, 500, Direction.BACKWARD)
+    await turn(Direction.RIGHT, 30, 100, 0.5)
+    await straight(800, 1000, Direction.BACKWARD)
+    await turn(Direction.LEFT, 30, 300, 0.5)
+    await straight(500, 800, Direction.BACKWARD)
 
 async def main():
     global g_yaw
