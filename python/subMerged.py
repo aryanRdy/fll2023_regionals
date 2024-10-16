@@ -253,22 +253,22 @@ async def run1():
     await motor.run_for_degrees(port.F,800,1000)#this and the line under this does the boat mission
     await turn(Direction.RIGHT,15,200)
     await straight(500,395,-1)# backs up from the boat mission
-    await turn(Direction.LEFT,55,200) # turns to get coral
+    await turn(Direction.LEFT,0,200,0) # turns to get coral
     await straight(800,325,1)# collects the coral
     await turn(Direction.LEFT,20,200)# turns to align with second krill
     await straight(1000,240,1)# collect second krill
-    await turn(Direction.RIGHT,45,200)# turn to align with 3rd krill
+    await turn(Direction.RIGHT,50,200)#turn to align with 3rd krill
     await straight(1000,250,1)# goes to collect third krill
     await straight(300,250,-1)#backs up from whale
-    await turn(Direction.RIGHT,100,200)#turns to align with sonar discovery mission
+    await turn(Direction.RIGHT,95,200)#turns to align with sonar discovery mission
     await straight(500,650,-1)#reaches sonar discovery
-    await turn(Direction.LEFT,15,200)# aligns robot with sonar discovery
+    await turn(Direction.LEFT,10,200)# aligns robot with sonar discovery
     await motor.run_for_degrees(port.D,2000,1000)# does sonar discovery
     await straight(500,100,-1)
     await turn(Direction.RIGHT,20,200)
     await straight(500,800,1)
-    await turn(Direction.RIGHT,30,200)
-    await straight(800,700,1)
+    await turn(Direction.RIGHT,20,200)
+    await straight(1050,1000,1)
 
 async def main():
     global g_yaw
