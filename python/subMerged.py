@@ -254,6 +254,43 @@ async def run_1():
     await turn(Direction.RIGHT, 30, 200)
     await straight(800, 700, 1)
 
+async def run_3():
+    await straight(500, 550, Direction.BACKWARD)
+    await turn(Direction.RIGHT, 45, 100, 0.6)
+    await straight(500, 350, Direction.BACKWARD)
+    await turn(Direction.RIGHT, 45, 100, 0.6)
+    await straight(700, 800, Direction.BACKWARD)
+    await straight(300, 250, Direction.FORWARD)
+
+    await turn(Direction.LEFT, 135, 100, 0.6)
+    #end of kracken
+
+    await straight(500, 1070, Direction.FORWARD)  # move towards trident mission
+    await turn(Direction.LEFT, 45, 100, 0.6)
+
+    #Artificial Habitat
+    await straight(300, 345, Direction.FORWARD)
+    await motor.run_for_degrees(port.F, -1500, 600)
+    motor.run_for_degrees(port.F, 1100, 115)
+    await straight(100, 400, Direction.BACKWARD)
+    await turn(Direction.LEFT, 135, 100, 0.6)
+    await straight(300, 325, Direction.FORWARD)
+    await turn(Direction.RIGHT, 90, 200, 0.6)
+    await straight(200, 320, Direction.FORWARD)
+
+    #pick up trident
+    await motor.run_for_degrees(port.D, -4000, 1100) # motor to pick up trident
+    await straight(50, 25, Direction.BACKWARD)
+    runloop.sleep_ms(5000)
+    await motor.run_for_degrees(port.D, 200, 200)
+    await motor.run_for_degrees(port.D, 200, 200)
+    await straight(500, 325, Direction.BACKWARD)
+
+    #go back home
+    await turn(Direction.RIGHT, 45, 100, 0.6)
+    await straight(700, 1000, Direction.BACKWARD)
+
+
 
 async def run_5():
     # attachmentMotor(WorkerMotor.LEFT, 300, 150, Direction.LEFT)
