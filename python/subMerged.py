@@ -138,17 +138,17 @@ async def turn(direction: int, degrees: int, speed: int, targetYaw: int = -500):
     g_yaw = tgtYaw  # Save the target yaw into our Global yaw.
     await runloop.sleep_ms(400)
 
-def attachmentMotor(workerMotor: int, degrees: int, speed: int, dir: int):
+def attachmentMotor(workerMotor: int, degrees: int, speed: int, direction: int):
     """workerMotor is AttachMotor.LEFT or AttachMotor.RIGHT
     direction is Direction.UP, Direction.RIGHT, Direction.FORWARD all equal to 1
     And the others -1 degrees to turn speed with which the motor should turn.
     This function will not wait until the Lift action is performed
     """
-    motor.run_for_degrees(workerMotor, degrees * dir, speed)
+    motor.run_for_degrees(workerMotor, degrees * direction, speed)
 
-async def attachmentMotor_async(workerMotor: int, degrees: int, speed: int, dir: int):
+async def attachmentMotor_async(workerMotor: int, degrees: int, speed: int, direction: int):
     """This function will wait until the Lift action is performed"""
-    await motor.run_for_degrees(workerMotor, degrees * dir, speed)
+    await motor.run_for_degrees(workerMotor, degrees * direction, speed)
 
 
 async def run_2():
