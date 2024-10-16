@@ -138,6 +138,7 @@ async def turn(direction: int, degrees: int, speed: int, targetYaw: int = -500):
     g_yaw = tgtYaw  # Save the target yaw into our Global yaw.
     await runloop.sleep_ms(400)
 
+
 def attachmentMotor(workerMotor: int, degrees: int, speed: int, direction: int):
     """workerMotor is AttachMotor.LEFT or AttachMotor.RIGHT
     direction is Direction.UP, Direction.RIGHT, Direction.FORWARD all equal to 1
@@ -146,9 +147,47 @@ def attachmentMotor(workerMotor: int, degrees: int, speed: int, direction: int):
     """
     motor.run_for_degrees(workerMotor, degrees * direction, speed)
 
+
 async def attachmentMotor_async(workerMotor: int, degrees: int, speed: int, direction: int):
     """This function will wait until the Lift action is performed"""
     await motor.run_for_degrees(workerMotor, degrees * direction, speed)
+
+
+async def run_1():
+    """Run 1"""
+    # await straight(400,825,1)
+    # motor.run_for_degrees(port.D,300,1000) # puts the sonar discovery attachment back
+    # await turn(Direction.RIGHT,45,200) #turn towards the boat mission
+    # await straight(300,200,1)#puts attachment on boat
+    await straight(500, 200, 1)
+    await turn(Direction.LEFT, 45, 200)
+    await straight(500, 650, 1)
+    await straight(500, 100, -1)
+    await turn(Direction.RIGHT, 0, 100, 60)
+    await straight(500, 450, 1)
+    await turn(Direction.LEFT, 20, 200)
+    await straight(500, 100, 1)
+    # this and the line under this does the boat mission
+    await motor.run_for_degrees(port.F, 800, 1000)
+    await turn(Direction.RIGHT, 15, 200)
+    await straight(500, 395, -1)  # backs up from the boat mission
+    await turn(Direction.LEFT, 55, 200)  # turns to get coral
+    await straight(800, 325, 1)  # collects the coral
+    await turn(Direction.LEFT, 20, 200)  # turns to align with second krill
+    await straight(1000, 240, 1)  # collect second krill
+    await turn(Direction.RIGHT, 45, 200)  # turn to align with 3rd krill
+    await straight(1000, 250, 1)  # goes to collect third krill
+    await straight(300, 250, -1)  # backs up from whale
+    # turns to align with sonar discovery mission
+    await turn(Direction.RIGHT, 100, 200)
+    await straight(500, 650, -1)  # reaches sonar discovery
+    await turn(Direction.LEFT, 15, 200)  # aligns robot with sonar discovery
+    await motor.run_for_degrees(port.D, 2000, 1000)  # does sonar discovery
+    await straight(500, 100, -1)
+    await turn(Direction.RIGHT, 20, 200)
+    await straight(500, 800, 1)
+    await turn(Direction.RIGHT, 30, 200)
+    await straight(800, 700, 1)
 
 
 async def run_2():
@@ -199,43 +238,6 @@ async def run_2():
     await straight(800, 1680, Direction.FORWARD)  # Drive to Home
 
 
-async def run_1():
-    """Run 1"""
-    # await straight(400,825,1)
-    # motor.run_for_degrees(port.D,300,1000) # puts the sonar discovery attachment back
-    # await turn(Direction.RIGHT,45,200) #turn towards the boat mission
-    # await straight(300,200,1)#puts attachment on boat
-    await straight(500, 200, 1)
-    await turn(Direction.LEFT, 45, 200)
-    await straight(500, 650, 1)
-    await straight(500, 100, -1)
-    await turn(Direction.RIGHT, 0, 100, 60)
-    await straight(500, 450, 1)
-    await turn(Direction.LEFT, 20, 200)
-    await straight(500, 100, 1)
-    # this and the line under this does the boat mission
-    await motor.run_for_degrees(port.F, 800, 1000)
-    await turn(Direction.RIGHT, 15, 200)
-    await straight(500, 395, -1)  # backs up from the boat mission
-    await turn(Direction.LEFT, 55, 200)  # turns to get coral
-    await straight(800, 325, 1)  # collects the coral
-    await turn(Direction.LEFT, 20, 200)  # turns to align with second krill
-    await straight(1000, 240, 1)  # collect second krill
-    await turn(Direction.RIGHT, 45, 200)  # turn to align with 3rd krill
-    await straight(1000, 250, 1)  # goes to collect third krill
-    await straight(300, 250, -1)  # backs up from whale
-    # turns to align with sonar discovery mission
-    await turn(Direction.RIGHT, 100, 200)
-    await straight(500, 650, -1)  # reaches sonar discovery
-    await turn(Direction.LEFT, 15, 200)  # aligns robot with sonar discovery
-    await motor.run_for_degrees(port.D, 2000, 1000)  # does sonar discovery
-    await straight(500, 100, -1)
-    await turn(Direction.RIGHT, 20, 200)
-    await straight(500, 800, 1)
-    await turn(Direction.RIGHT, 30, 200)
-    await straight(800, 700, 1)
-
-
 async def run_3():
     """Run 3"""
     await straight(500, 550, Direction.BACKWARD)
@@ -274,6 +276,40 @@ async def run_3():
     # go back home
     await turn(Direction.RIGHT, 45, 100)
     await straight(700, 1000, Direction.BACKWARD)
+
+
+async def run_4():
+    """ Run 4 """
+    await straight(800, 1100, Direction.FORWARD)  # start moving
+    await turn(Direction.RIGHT, 90, 100)  # take first turn
+    await straight(800, 65, Direction.FORWARD)  # got toward the boat
+    # await turn(Direction.RIGHT, 90, 100)
+    await motor.run_for_degrees(port.D, 2300, 4000)  # Drop the stuff was 2300
+    await motor.run_for_degrees(port.D, -2300, 4000)  # w move te box up
+    await straight(400, 65, Direction.FORWARD)
+    # await straight(800, 200, Direction.FORWARD)
+    await turn(Direction.LEFT, 90, 100)
+    # was 400 pushes the boat forward
+    await straight(600, 450, Direction.FORWARD)
+    # await turn(Direction.LEFT, 20, 200)
+    # print("driving straight")
+    await straight(300, 125, Direction.BACKWARD)  # Moves back  Mowas. 150
+    await turn(Direction.LEFT, 90, 100)
+    await straight(200, 400, Direction.BACKWARD)  # Original was 400
+    await turn(Direction.LEFT, 90, 100)
+    # await turn(Direction.LEFT, 55, 10)
+    # 875 worked Vamshi: SRI NOTE: -> This is the line that will push the boat into latch, may need adjustment to this line. FYI  original entries: (800,900)
+    await straight(800, 875, Direction.BACKWARD)
+    # await straight(800, 1000, Direction.FORWARD)
+    # code for robot to come back
+    await straight(800, 500, Direction.FORWARD)  # 500
+    # print("At line 148")
+    await turn(Direction.RIGHT, 30, 100)
+    await straight(800, 900, Direction.FORWARD)
+    # print("about to return")
+    await turn(Direction.LEFT, 45, 300)  # was 30
+    # 800, 900 :  SRI NOTE THIS -> Vamshi: change to 500, 800 if doesnt work
+    await straight(800, 600, Direction.FORWARD)
 
 
 async def run_5():
@@ -326,43 +362,11 @@ async def run_5_2():
     await straight(320, 200, Direction.BACKWARD)
 
 
-async def run_4():
-    """ Run 4 """
-    await straight(800, 1100, Direction.FORWARD)  # start moving
-    await turn(Direction.RIGHT, 90, 100)  # take first turn
-    await straight(800, 65, Direction.FORWARD)  # got toward the boat
-    # await turn(Direction.RIGHT, 90, 100)
-    await motor.run_for_degrees(port.D, 2300, 4000)  # Drop the stuff was 2300
-    await motor.run_for_degrees(port.D, -2300, 4000)  # w move te box up
-    await straight(400, 65, Direction.FORWARD)
-    # await straight(800, 200, Direction.FORWARD)
-    await turn(Direction.LEFT, 90, 100)
-    # was 400 pushes the boat forward
-    await straight(600, 450, Direction.FORWARD)
-    # await turn(Direction.LEFT, 20, 200)
-    # print("driving straight")
-    await straight(300, 125, Direction.BACKWARD)  # Moves back  Mowas. 150
-    await turn(Direction.LEFT, 90, 100)
-    await straight(200, 400, Direction.BACKWARD)  # Original was 400
-    await turn(Direction.LEFT, 90, 100)
-    # await turn(Direction.LEFT, 55, 10)
-    # 875 worked Vamshi: SRI NOTE: -> This is the line that will push the boat into latch, may need adjustment to this line. FYI  original entries: (800,900)
-    await straight(800, 875, Direction.BACKWARD)
-    # await straight(800, 1000, Direction.FORWARD)
-    # code for robot to come back
-    await straight(800, 500, Direction.FORWARD)  # 500
-    # print("At line 148")
-    await turn(Direction.RIGHT, 30, 100)
-    await straight(800, 900, Direction.FORWARD)
-    # print("about to return")
-    await turn(Direction.LEFT, 45, 300)  # was 30
-    # 800, 900 :  SRI NOTE THIS -> Vamshi: change to 500, 800 if doesnt work
-    await straight(800, 600, Direction.FORWARD)
-
 g_yaw = 0  # Define the global variable at the module level
+
 async def main():
     """Main function"""
-    global g_yaw 
+    global g_yaw
     g_yaw = 0
 
     motion_sensor.reset_yaw(0)
