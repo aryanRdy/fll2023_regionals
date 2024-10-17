@@ -31,7 +31,7 @@ def get_drift(tgt_yaw):
     c_yaw = get_yaw()
     # When robot is close to 360, it can drift to 2 or drift to 359
     # This will take into consideration all the cases.
-    if tgt_yaw > 270 and c_yaw < 90:# This condition is when your target yaw is in Q4 and Current yaw is in Q1
+    if tgt_yaw > 270 and c_yaw < 90:  # This condition is when your target yaw is in Q4 and Current yaw is in Q1
         drift = 360 - tgt_yaw + c_yaw
     else:
         drift = c_yaw - tgt_yaw
@@ -135,7 +135,7 @@ async def turn(direction: int, degrees: int, speed: int, targetYaw: int = -500):
             motor.run(port.B, tgtSpeed)
 
     motor_pair.stop(motor_pair.PAIR_1, stop=motor.SMART_BRAKE)
-    g_yaw = tgtYaw# Save the target yaw into our Global yaw.
+    g_yaw = tgtYaw  # Save the target yaw into our Global yaw.
     await runloop.sleep_ms(400)
 
 
@@ -170,19 +170,19 @@ async def run_1():
     # this and the line under this does the boat mission
     await motor.run_for_degrees(port.F, 800, 1000)
     await turn(Direction.RIGHT, 15, 200)
-    await straight(500, 395, -1)# backs up from the boat mission
-    await turn(Direction.LEFT, 55, 200)# turns to get coral
-    await straight(800, 325, 1)# collects the coral
-    await turn(Direction.LEFT, 20, 200)# turns to align with second krill
-    await straight(1000, 240, 1)# collect second krill
-    await turn(Direction.RIGHT, 45, 200)# turn to align with 3rd krill
-    await straight(1000, 250, 1)# goes to collect third krill
-    await straight(300, 250, -1)# backs up from whale
+    await straight(500, 395, -1)  # backs up from the boat mission
+    await turn(Direction.LEFT, 55, 200)  # turns to get coral
+    await straight(800, 325, 1)  # collects the coral
+    await turn(Direction.LEFT, 20, 200)  # turns to align with second krill
+    await straight(1000, 240, 1)  # collect second krill
+    await turn(Direction.RIGHT, 45, 200)  # turn to align with 3rd krill
+    await straight(1000, 250, 1)  # goes to collect third krill
+    await straight(300, 250, -1)  # backs up from whale
     # turns to align with sonar discovery mission
     await turn(Direction.RIGHT, 100, 200)
-    await straight(500, 650, -1)# reaches sonar discovery
-    await turn(Direction.LEFT, 15, 200)# aligns robot with sonar discovery
-    await motor.run_for_degrees(port.D, 2000, 1000)# does sonar discovery
+    await straight(500, 650, -1)  # reaches sonar discovery
+    await turn(Direction.LEFT, 15, 200)  # aligns robot with sonar discovery
+    await motor.run_for_degrees(port.D, 2000, 1000)  # does sonar discovery
     await straight(500, 100, -1)
     await turn(Direction.RIGHT, 20, 200)
     await straight(500, 800, 1)
@@ -194,18 +194,18 @@ async def run_2():
     """RUN 2"""
     # attachmentMotor(WorkerMotor.LEFT, 300, 150, Direction.LEFT)
     # attachmentMotor(WorkerMotor.RIGHT, 300, 220, Direction.LEFT)
-    await straight(450, 460, Direction.FORWARD)# We start sideways
+    await straight(450, 460, Direction.FORWARD)  # We start sideways
     await turn(Direction.RIGHT, 0, 300, 40)
     # Go towards dropping the Squid
     await straight(450, 1400, Direction.FORWARD)
     # Turn towards Red squid drop off location
     await turn(Direction.RIGHT, 0, 300, 90)
-    await straight(450, 120, Direction.FORWARD)# Drop of Red Squid
-    await straight(450, 145, Direction.BACKWARD)# Backup
+    await straight(450, 120, Direction.FORWARD)  # Drop of Red Squid
+    await straight(450, 145, Direction.BACKWARD)  # Backup
 
-    await turn(Direction.LEFT, 0, 200, 40)# Angler fish mission
+    await turn(Direction.LEFT, 0, 200, 40)  # Angler fish mission
     # attachmentMotor(WorkerMotor.LEFT, 300, 150, Direction.RIGHT)
-    await straight(800, 790, Direction.FORWARD)# Angler fish mission 650
+    await straight(800, 790, Direction.FORWARD)  # Angler fish mission 650
     await turn(Direction.RIGHT, 0, 200, 65)
 
     # Go straight to pick up the Sea bed sample
@@ -217,11 +217,11 @@ async def run_2():
 
     # Turn to 0 degrees towards Water sample
     await turn(Direction.LEFT, 0, 400, 0)
-    await straight(150, 290, Direction.FORWARD)# Go towards the Water Sample
+    await straight(150, 290, Direction.FORWARD)  # Go towards the Water Sample
     # Pick up water sample
     await attachmentMotor_async(WorkerMotor.LEFT, 140, 200, Direction.RIGHT)
 
-    await straight(450, 357, Direction.FORWARD)# Go towards the Coral Nursery
+    await straight(450, 357, Direction.FORWARD)  # Go towards the Coral Nursery
     # Lift the tire hammer
     await attachmentMotor_async(WorkerMotor.RIGHT, 65, 120, Direction.LEFT)
     attachmentMotor(WorkerMotor.LEFT, 65, 120, Direction.RIGHT)
@@ -230,7 +230,7 @@ async def run_2():
     # Coral nursery Lift up
     await attachmentMotor_async(WorkerMotor.RIGHT, 100, 200, Direction.LEFT)
     attachmentMotor(WorkerMotor.RIGHT, 300, 350,
-                    Direction.LEFT)# Lift up the hammer
+                    Direction.LEFT)  # Lift up the hammer
     await straight(285, 365, Direction.FORWARD)    # Move towards Shark
     runloop.sleep_ms(200)
     # Hit the Shark button
@@ -241,8 +241,8 @@ async def run_2():
     runloop.sleep_ms(300)
     # Step back at coral buds / Shark mission
     await straight(300, 400, Direction.BACKWARD)
-    await turn(Direction.LEFT, 50, 200)# Turn left towards Home
-    await straight(800, 1680, Direction.FORWARD)# Drive to Home
+    await turn(Direction.LEFT, 50, 200)  # Turn left towards Home
+    await straight(800, 1680, Direction.FORWARD)  # Drive to Home
 
 
 async def run_3():
@@ -287,12 +287,12 @@ async def run_3():
 
 async def run_4():
     """ Run 4 """
-    await straight(800, 1100, Direction.FORWARD)# start moving
-    await turn(Direction.RIGHT, 90, 100)# take first turn
-    await straight(800, 65, Direction.FORWARD)# got toward the boat
+    await straight(800, 1100, Direction.FORWARD)  # start moving
+    await turn(Direction.RIGHT, 90, 100)  # take first turn
+    await straight(800, 65, Direction.FORWARD)  # got toward the boat
     # await turn(Direction.RIGHT, 90, 100)
-    await motor.run_for_degrees(port.D, 2300, 4000)# Drop the stuff was 2300
-    await motor.run_for_degrees(port.D, -2300, 4000)# w move te box up
+    await motor.run_for_degrees(port.D, 2300, 4000)  # Drop the stuff was 2300
+    await motor.run_for_degrees(port.D, -2300, 4000)  # w move te box up
     await straight(400, 65, Direction.FORWARD)
     # await straight(800, 200, Direction.FORWARD)
     await turn(Direction.LEFT, 90, 100)
@@ -300,9 +300,9 @@ async def run_4():
     await straight(600, 450, Direction.FORWARD)
     # await turn(Direction.LEFT, 20, 200)
     # print("driving straight")
-    await straight(300, 125, Direction.BACKWARD)# Moves backMowas. 150
+    await straight(300, 125, Direction.BACKWARD)  # Moves backMowas. 150
     await turn(Direction.LEFT, 90, 100)
-    await straight(200, 400, Direction.BACKWARD)# Original was 400
+    await straight(200, 400, Direction.BACKWARD)  # Original was 400
     await turn(Direction.LEFT, 90, 100)
     # await turn(Direction.LEFT, 55, 10)
     # 875 worked Vamshi:
@@ -311,12 +311,12 @@ async def run_4():
     await straight(800, 875, Direction.BACKWARD)
     # await straight(800, 1000, Direction.FORWARD)
     # code for robot to come back
-    await straight(800, 500, Direction.FORWARD)# 500
+    await straight(800, 500, Direction.FORWARD)  # 500
     # print("At line 148")
     await turn(Direction.RIGHT, 30, 100)
     await straight(800, 900, Direction.FORWARD)
     # print("about to return")
-    await turn(Direction.LEFT, 45, 300)# was 30
+    await turn(Direction.LEFT, 45, 300)  # was 30
     # 800, 900 :SRI NOTE THIS -> Vamshi: change to 500, 800 if doesnt work
     await straight(800, 600, Direction.FORWARD)
 
@@ -324,12 +324,12 @@ async def run_4():
 async def run_5():
     """Run 5"""
     # attachmentMotor(WorkerMotor.LEFT, 300, 150, Direction.LEFT)
-    await straight(450, 3100, Direction.FORWARD)# Going straight
-    await turn(Direction.LEFT, 0, 110, -90)# turns
+    await straight(450, 3100, Direction.FORWARD)  # Going straight
+    await turn(Direction.LEFT, 0, 110, -90)  # turns
     # await straight (450, 650, Direction.FORWARD)
     # goes to the mission but not purfectly in there
     await straight(450, 630, Direction.FORWARD)
-    await turn(Direction.RIGHT, 0, 110, -45)# turns to the mission
+    await turn(Direction.RIGHT, 0, 110, -45)  # turns to the mission
     # await straight (450, 550, Direction.FORWARD)
     # goes into the whale pushy thing that makes the whales mouth open
     await straight(450, 550, Direction.FORWARD)
@@ -337,9 +337,9 @@ async def run_5():
     await attachmentMotor_async(WorkerMotor.LEFT, 1300, 400, Direction.RIGHT)
     # await attachmentMotor_async(WorkerMotor.LEFT, 1300, 400, Direction.LEFT)
     # Run for Last Mission
-    await straight(350, 700, Direction.BACKWARD)# Backup from Whale
-    await turn(Direction.LEFT, 92, 98)# Change Direction
-    await straight(320, 880, Direction.FORWARD)# Head to Final Station
+    await straight(350, 700, Direction.BACKWARD)  # Backup from Whale
+    await turn(Direction.LEFT, 92, 98)  # Change Direction
+    await straight(320, 880, Direction.FORWARD)  # Head to Final Station
     # await straight (320, 150, Direction.FORWARD)
     # attachmentMotor(WorkerMotor.RIGHT, 320, 150, Direction.LEFT) #Make the bar go up
     # Need this backward to help the bar
@@ -349,12 +349,12 @@ async def run_5():
 async def run_5_2():
     """Speed version of Run5"""
     # attachmentMotor(WorkerMotor.LEFT, 300, 150, Direction.LEFT)
-    await straight(800, 3100, Direction.FORWARD)# Going straight
-    await turn(Direction.LEFT, 0, 110, -90)# turns
+    await straight(800, 3100, Direction.FORWARD)  # Going straight
+    await turn(Direction.LEFT, 0, 110, -90)  # turns
     # await straight (450, 650, Direction.FORWARD)
     # goes to the mission but not purfectly in there
     await straight(800, 630, Direction.FORWARD)
-    await turn(Direction.RIGHT, 0, 200, -45)# turns to the mission
+    await turn(Direction.RIGHT, 0, 200, -45)  # turns to the mission
     # await straight (450, 550, Direction.FORWARD)
     # goes into the whale pushy thing that makes the whales mouth open
     await straight(500, 515, Direction.FORWARD)
@@ -362,16 +362,16 @@ async def run_5_2():
     await attachmentMotor_async(WorkerMotor.LEFT, 1350, 450, Direction.RIGHT)
     # await attachmentMotor_async(WorkerMotor.LEFT, 1300, 400, Direction.LEFT)
     # Run for Last Mission
-    await straight(800, 690, Direction.BACKWARD)# Backup from Whale
-    await turn(Direction.LEFT, 91, 200)# Change Direction
-    await straight(500, 860, Direction.FORWARD)# Head to Final Station
+    await straight(800, 690, Direction.BACKWARD)  # Backup from Whale
+    await turn(Direction.LEFT, 91, 200)  # Change Direction
+    await straight(500, 860, Direction.FORWARD)  # Head to Final Station
     # await straight (320, 150, Direction.FORWARD)
     # attachmentMotor(WorkerMotor.RIGHT, 320, 150, Direction.LEFT) #Make the bar go up
     # Need this backward to help the bar
     await straight(320, 200, Direction.BACKWARD)
 
 
-g_yaw = 0# Define the global variable at the module level
+g_yaw = 0  # Define the global variable at the module level
 
 
 async def main():
@@ -383,7 +383,7 @@ async def main():
     motor_pair.pair(motor_pair.PAIR_1, port.B, port.A)
 
     while True:
-        color_detected = color_sensor.color(port.C)# Read sensor value once
+        color_detected = color_sensor.color(port.C)  # Read sensor value once
         if color_detected is color.BLUE:
             await run_1()
         if color_detected is color.RED:
