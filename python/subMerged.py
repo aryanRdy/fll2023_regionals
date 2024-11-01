@@ -26,6 +26,7 @@ class Arm:
     LEFT = port.E
     RIGHT = port.B
 
+
 class DriverMotor:
     """Which Port is Left and Right Driver Motors"""
     LEFT = port.A
@@ -37,7 +38,7 @@ def get_drift(tgt_yaw):
     c_yaw = get_yaw()
     # When robot is close to 360, it can drift to 2 or drift to 359
     # This will take into consideration all the cases.
-    if tgt_yaw > 270 and c_yaw < 90: 
+    if tgt_yaw > 270 and c_yaw < 90:
         # This condition is when your target yaw is in Q4 and Current yaw is in Q1
         drift = 360 - tgt_yaw + c_yaw
     else:
@@ -76,7 +77,8 @@ def angleDiff(tgt_yaw):
 
     return cur_yaw - tgt_yaw
 
-async def straight(direction: int, distance: int, speed: int, accel:int = 500):
+
+async def straight(direction: int, distance: int, speed: int, accel: int = 500):
     """ Drives straight"""
     global g_yaw
     tgtYaw = g_yaw
@@ -89,8 +91,8 @@ async def straight(direction: int, distance: int, speed: int, accel:int = 500):
     drift = get_drift(tgtYaw) * 2
 
     if (distance > minDistanceToFixYaw):
-        while  minDistanceToFixYaw > abs(motor.relative_position(DriverMotor.LEFT)):
-        # sets the return value of the tuple to a tuple, so we can pull a specific value from it
+        while minDistanceToFixYaw > abs(motor.relative_position(DriverMotor.LEFT)):
+            # sets the return value of the tuple to a tuple, so we can pull a specific value from it
             drift = get_drift(tgtYaw) * 2
 
             if direction == Direction.BACKWARD:
@@ -99,11 +101,12 @@ async def straight(direction: int, distance: int, speed: int, accel:int = 500):
             else:
                 motor_pair.move(motor_pair.PAIR_1, drift * -1,
                                 velocity=minDistanceSpeed)
-        distanceLeft = distance - abs(motor.relative_position(DriverMotor.LEFT))
-        await motor_pair.move_for_degrees(motor_pair.PAIR_1, distanceLeft, 0, velocity = speed,stop=motor.BRAKE,acceleration=accel)
+        distanceLeft = distance - \
+            abs(motor.relative_position(DriverMotor.LEFT))
+        await motor_pair.move_for_degrees(motor_pair.PAIR_1, distanceLeft, 0, velocity=speed, stop=motor.BRAKE, acceleration=accel)
     else:
         while distance > abs(motor.relative_position(DriverMotor.LEFT)):
-        # sets the return value of the tuple to a tuple, so we can pull a specific value from it
+            # sets the return value of the tuple to a tuple, so we can pull a specific value from it
             drift = get_drift(tgtYaw)
 
             if direction == Direction.BACKWARD:
@@ -111,7 +114,7 @@ async def straight(direction: int, distance: int, speed: int, accel:int = 500):
                                 velocity=speed * -1)
             else:
                 motor_pair.move(motor_pair.PAIR_1, drift * -1,
-                                velocity=speed)        
+                                velocity=speed)
 
     # stops the motors after they are out of the while loop
     motor_pair.stop(motor_pair.PAIR_1)
@@ -142,7 +145,7 @@ async def turn(direction: int, degrees: int, speed: int, targetYaw: int = -500):
         while (agdiff := angleDiff(tgtYaw)) > 0:
             tgtSpeed = int(max((agdiff/origDiff) * speed, minSpeed))
             # We need to turn both wheels backwards to turn Right
-            motor.run(DriverMotor.LEFT, tgtSpeed * -1 )
+            motor.run(DriverMotor.LEFT, tgtSpeed * -1)
             motor.run(DriverMotor.RIGHT, tgtSpeed * -1)
     elif direction == Direction.LEFT:
         if targetYaw == -500:
@@ -158,7 +161,7 @@ async def turn(direction: int, degrees: int, speed: int, targetYaw: int = -500):
             motor.run(DriverMotor.RIGHT, tgtSpeed)
 
     motor_pair.stop(motor_pair.PAIR_1, stop=motor.SMART_BRAKE)
-    g_yaw = tgtYaw# Save the target yaw into our Global yaw.
+    g_yaw = tgtYaw  # Save the target yaw into our Global yaw.
     await runloop.sleep_ms(200)
 
 
@@ -180,7 +183,8 @@ async def Run_1():
     """This is Run 1"""
     await straight(2000, 630, Direction.FORWARD)
 
-g_yaw = 0 # Define the global variable at the module level
+g_yaw = 0  # Define the global variable at the module level
+
 
 async def readyForRun():
     global g_yaw
@@ -188,7 +192,34 @@ async def readyForRun():
     motion_sensor.reset_yaw(0)
     motor_pair.pair(motor_pair.PAIR_1, DriverMotor.LEFT, DriverMotor.RIGHT)
 
+
+async def Run_1():
+    """ This is Run1 """
+    print("This is Run1")
+
+
+async def Run_2():
+    """ This is Run2 """
+    print("This is Run2")
+
+
+async def Run_3():
+    """ This is Run3 """
+    print("This is Run3")
+
+
+async def Run_4():
+    """ This is Run4 """
+    print("This is Run4")
+
+
+async def Run_5():
+    """ This is Run5 """
+    print("This is Run5")
+
 # Actual 1000 degrees = 21.377 inches
+
+
 async def main():
     """Main function"""
     global g_yaw
@@ -198,21 +229,25 @@ async def main():
     motor_pair.pair(motor_pair.PAIR_1, DriverMotor.LEFT, DriverMotor.RIGHT)
 
     while True:
-        color_detected = color_sensor.color(port.D) # Read sensor value once
+        color_detected = color_sensor.color(port.D)  # Read sensor value once
         if color_detected is color.BLUE:
             await readyForRun()
-            print ("BLUE RUN 1")
+            await Run_1()
+
         if color_detected is color.RED:
             await readyForRun()
-            print("RED Run 2")
+            await Run_2()
+
         elif color_detected is color.WHITE:
             await readyForRun()
-            print("WHITE Run 3")
+            await Run_3()
+
         elif color_detected is color.YELLOW:
             await readyForRun()
-            print("YELLOW Run 4")
+            await Run_4()
+
         elif color_detected is color.MAGENTA:
             await readyForRun()
-            print("MAGENTA Run 5")
+            await Run_5()
 
 runloop.run(main())
