@@ -186,7 +186,17 @@ async def readyForRun():
 
 async def Run_1():
     """ This is Run1 """
-    print("This is Run1")
+    await straight(Direction.FORWARD, 200, 500)
+    await turn(Direction.LEFT, 45, 200,)
+    await straight(Direction.FORWARD, 500, 500)
+    await straight(Direction.BACKWARD, 30, 500)
+    await turn(Direction.LEFT, 30, 200,)
+    await straight(Direction.FORWARD, 600, 500)
+    await turn(Direction.RIGHT, 15, 200,)
+    await straight(Direction.FORWARD, 500, 800)
+    await turn(Direction.RIGHT, 70, 200)
+    await straight(Direction.FORWARD, 100, 1050, accel=1000)
+    await motor_pair.move_for_degrees(motor_pair.PAIR_1, 360, 0, velocity=500)
 
 
 async def Run_2():
