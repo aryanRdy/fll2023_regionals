@@ -57,7 +57,7 @@ def get_yaw() -> int:
     return yaw
 
 
-def angleDiff(tgt_yaw):
+def angleDiff(tgt_yaw, direction):
     """Give the angle difference between current yaw and target yaw
     There are 4 Cases Here:
         1. When turnnig Right and When current yaw is 350 and Target yaw is 30
@@ -66,16 +66,20 @@ def angleDiff(tgt_yaw):
         4. When turning Left and When target yaw is 270 and current yaw is 350
 """
     cur_yaw = get_yaw()
+    if (cur_yaw == 0 and tgt_yaw == 360) or (cur_yaw == 360 and tgt_yaw == 0):
+        return 0
+
     # right turn for robot and crossing 360 degree boundry
-    if tgt_yaw < 90 and cur_yaw > 270:
+    if tgt_yaw > 0 and cur_yaw > tgt_yaw and direction == Direction.RIGHT:
         return 360 - cur_yaw + tgt_yaw
     # left turn for robot and crossing 360 degree boundry
-    elif cur_yaw < 90 and tgt_yaw > 270:
+    elif cur_yaw > 0 and tgt_yaw > cur_yaw and direction == Direction.LEFT:
         return 360 - tgt_yaw + cur_yaw
-    elif tgt_yaw > cur_yaw:
-        return tgt_yaw - cur_yaw
 
-    return cur_yaw - tgt_yaw
+    if cur_yaw == 0 and direction == Direction.LEFT:
+        cur_yaw = 360
+
+    return abs(cur_yaw - tgt_yaw)
 
 
 async def straight(direction: int, distance: int, speed: int, accel: int = 500):
@@ -135,30 +139,22 @@ async def turn(direction: int, degrees: int, speed: int, targetYaw: int = -500):
     if targetYaw >= -360 and targetYaw < 0:
         targetYaw = 360 + targetYaw
 
-    if direction == Direction.RIGHT:
-        if targetYaw == -500:
+    if targetYaw == -500:
+        if direction == Direction.RIGHT:
             tgtYaw = (g_yaw + degrees) % 360
-        else:
-            tgtYaw = targetYaw
-            origDiff = angleDiff(targetYaw)
 
-        while (agdiff := angleDiff(tgtYaw)) > 0:
-            tgtSpeed = int(max((agdiff/origDiff) * speed, minSpeed))
-            # We need to turn both wheels backwards to turn Right
-            motor.run(DriverMotor.LEFT, tgtSpeed * -1)
-            motor.run(DriverMotor.RIGHT, tgtSpeed * -1)
-    elif direction == Direction.LEFT:
-        if targetYaw == -500:
+        if direction == Direction.LEFT:
             tgtYaw = (g_yaw - degrees + 360) % 360
-        else:
-            tgtYaw = targetYaw
-            origDiff = angleDiff(targetYaw)
+    else:
+        tgtYaw = targetYaw
+        origDiff = angleDiff(targetYaw, direction)
 
-        # Angle diff gives us the difference between my current yaw and the target yaw
-        while (agdiff := angleDiff(tgtYaw)) > 0:
-            tgtSpeed = int(max((agdiff/origDiff) * speed, minSpeed))
-            motor.run(DriverMotor.LEFT, tgtSpeed)
-            motor.run(DriverMotor.RIGHT, tgtSpeed)
+    while (agdiff := angleDiff(tgtYaw, direction)) > 0:
+        tgtSpeed = int(max((agdiff/origDiff) * speed, minSpeed))
+        # We need to turn both wheels backwards to turn Right
+        motor.run(DriverMotor.LEFT, tgtSpeed * direction * -1)
+        motor.run(DriverMotor.RIGHT, tgtSpeed * direction * -1)
+        print(tgtSpeed)
 
     motor_pair.stop(motor_pair.PAIR_1, stop=motor.SMART_BRAKE)
     g_yaw = tgtYaw  # Save the target yaw into our Global yaw.
@@ -179,10 +175,6 @@ async def attachmentMotor_async(workerMotor: int, degrees: int, speed: int, dire
     await motor.run_for_degrees(workerMotor, degrees * direction, speed)
 
 
-async def Run_1():
-    """This is Run 1"""
-    await straight(2000, 630, Direction.FORWARD)
-
 g_yaw = 0  # Define the global variable at the module level
 
 
@@ -190,7 +182,6 @@ async def readyForRun():
     global g_yaw
     g_yaw = 0
     motion_sensor.reset_yaw(0)
-    motor_pair.pair(motor_pair.PAIR_1, DriverMotor.LEFT, DriverMotor.RIGHT)
 
 
 async def Run_1():
@@ -204,8 +195,11 @@ async def Run_2():
 
 
 async def Run_3():
-    """ This is Run3 """
-    print("This is Run3")
+    """ This is Run3 ARYAN"""
+    await turn(Direction.RIGHT, 0, 400, 90)
+    return
+    await runloop.sleep_ms(200)
+    await turn(Direction.RIGHT, 0, 500, 90)
 
 
 async def Run_4():
