@@ -107,7 +107,11 @@ async def straight(direction: int, distance: int, speed: int, accel: int = 500):
                                 velocity=minDistanceSpeed)
         distanceLeft = distance - \
             abs(motor.relative_position(DriverMotor.LEFT))
+
+        if Direction.BACKWARD:
+            distanceLeft = -distanceLeft
         await motor_pair.move_for_degrees(motor_pair.PAIR_1, distanceLeft, 0, velocity=speed, stop=motor.BRAKE, acceleration=accel)
+
     else:
         while distance > abs(motor.relative_position(DriverMotor.LEFT)):
             # sets the return value of the tuple to a tuple, so we can pull a specific value from it
@@ -154,7 +158,6 @@ async def turn(direction: int, degrees: int, speed: int, targetYaw: int = -500):
         # We need to turn both wheels backwards to turn Right
         motor.run(DriverMotor.LEFT, tgtSpeed * direction * -1)
         motor.run(DriverMotor.RIGHT, tgtSpeed * direction * -1)
-        print(tgtSpeed)
 
     motor_pair.stop(motor_pair.PAIR_1, stop=motor.SMART_BRAKE)
     g_yaw = tgtYaw  # Save the target yaw into our Global yaw.
@@ -186,10 +189,11 @@ async def readyForRun():
 
 async def Run_1():
     """ This is Run1 """
-    await straight(Direction.FORWARD, 200, 500)
-    await turn(Direction.LEFT, 45, 200,)
-    await straight(Direction.FORWARD, 500, 500)
-    await straight(Direction.BACKWARD, 30, 500)
+    await straight(Direction.BACKWARD, 2000, 1000, accel=1000)
+    # await turn(Direction.LEFT, 45, 200,)
+    # await straight(Direction.BACKWARD, 500, 1000, accel=1000)
+    return
+    await straight(Direction.FORWARD, 30, 500)
     await turn(Direction.LEFT, 30, 200,)
     await straight(Direction.FORWARD, 600, 500)
     await turn(Direction.RIGHT, 15, 200,)
