@@ -108,7 +108,7 @@ async def straight(direction: int, distance: int, speed: int, accel: int = 500):
         distanceLeft = distance - \
             abs(motor.relative_position(DriverMotor.LEFT))
         
-        if direction == Direction.BACKWARD
+        if direction == Direction.BACKWARD:
             distanceLeft = - distanceLeft
             
         await motor_pair.move_for_degrees(motor_pair.PAIR_1, distanceLeft, 0, velocity=speed, stop=motor.BRAKE, acceleration=accel)
