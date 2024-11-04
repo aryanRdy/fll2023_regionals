@@ -107,6 +107,10 @@ async def straight(direction: int, distance: int, speed: int, accel: int = 500):
                                 velocity=minDistanceSpeed)
         distanceLeft = distance - \
             abs(motor.relative_position(DriverMotor.LEFT))
+        
+        if direction == Direction.BACKWARD
+            distanceLeft = - distanceLeft
+            
         await motor_pair.move_for_degrees(motor_pair.PAIR_1, distanceLeft, 0, velocity=speed, stop=motor.BRAKE, acceleration=accel)
     else:
         while distance > abs(motor.relative_position(DriverMotor.LEFT)):
@@ -154,7 +158,6 @@ async def turn(direction: int, degrees: int, speed: int, targetYaw: int = -500):
         # We need to turn both wheels backwards to turn Right
         motor.run(DriverMotor.LEFT, tgtSpeed * direction * -1)
         motor.run(DriverMotor.RIGHT, tgtSpeed * direction * -1)
-        print(tgtSpeed)
 
     motor_pair.stop(motor_pair.PAIR_1, stop=motor.SMART_BRAKE)
     g_yaw = tgtYaw  # Save the target yaw into our Global yaw.
