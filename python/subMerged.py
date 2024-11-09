@@ -57,7 +57,7 @@ def get_yaw() -> int:
     return yaw
 
 
-def angleDiff(tgt_yaw, direction):
+def angleDiff(tgt_yaw):
     """Give the angle difference between current yaw and target yaw
     There are 4 Cases Here:
         1. When turnnig Right and When current yaw is 350 and Target yaw is 30
@@ -66,20 +66,16 @@ def angleDiff(tgt_yaw, direction):
         4. When turning Left and When target yaw is 270 and current yaw is 350
 """
     cur_yaw = get_yaw()
-    if (cur_yaw == 0 and tgt_yaw == 360) or (cur_yaw == 360 and tgt_yaw == 0):
-        return 0
-
     # right turn for robot and crossing 360 degree boundry
-    if tgt_yaw > 0 and cur_yaw > tgt_yaw and direction == Direction.RIGHT:
+    if tgt_yaw < 90 and cur_yaw > 270:
         return 360 - cur_yaw + tgt_yaw
     # left turn for robot and crossing 360 degree boundry
-    elif cur_yaw > 0 and tgt_yaw > cur_yaw and direction == Direction.LEFT:
+    elif cur_yaw < 90 and tgt_yaw > 270:
         return 360 - tgt_yaw + cur_yaw
+    elif tgt_yaw > cur_yaw:
+        return tgt_yaw - cur_yaw
 
-    if cur_yaw == 0 and direction == Direction.LEFT:
-        cur_yaw = 360
-
-    return abs(cur_yaw - tgt_yaw)
+    return cur_yaw - tgt_yaw
 
 
 async def straight(direction: int, distance: int, speed: int, accel: int = 500):
@@ -151,9 +147,9 @@ async def turn(direction: int, degrees: int, speed: int, targetYaw: int = -500):
             tgtYaw = (g_yaw - degrees + 360) % 360
     else:
         tgtYaw = targetYaw
-        origDiff = angleDiff(targetYaw, direction)
+        origDiff = angleDiff(targetYaw)
 
-    while (agdiff := angleDiff(tgtYaw, direction)) > 0:
+    while (agdiff := angleDiff(tgtYaw)) > 0:
         tgtSpeed = int(max((agdiff/origDiff) * speed, minSpeed))
         # We need to turn both wheels backwards to turn Right
         motor.run(DriverMotor.LEFT, tgtSpeed * direction * -1)
