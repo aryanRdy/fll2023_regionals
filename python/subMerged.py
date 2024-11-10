@@ -23,8 +23,8 @@ class Direction:
 
 class Arm:
     """Which Arm motor"""
-    LEFT = port.E
-    RIGHT = port.B
+    LEFT = port.B
+    RIGHT = port.E
 
 
 class DriverMotor:
@@ -78,7 +78,7 @@ def angleDiff(tgt_yaw):
     return cur_yaw - tgt_yaw
 
 
-async def straight(direction: int, distance: int, speed: int, accel: int = 500):
+async def straight(direction: int, distance: int, speed: int, accel: int = 500, justGoFast: int = 0):
     """ Drives straight"""
     global g_yaw
     tgtYaw = g_yaw
@@ -90,7 +90,7 @@ async def straight(direction: int, distance: int, speed: int, accel: int = 500):
     motor.reset_relative_position(DriverMotor.RIGHT, 0)
     drift = get_drift(tgtYaw) * 2
 
-    if (distance > minDistanceToFixYaw):
+    if (distance > minDistanceToFixYaw and justGoFast is 0):
         while minDistanceToFixYaw > abs(motor.relative_position(DriverMotor.LEFT)):
             # sets the return value of the tuple to a tuple, so we can pull a specific value from it
             drift = get_drift(tgtYaw) * 2
@@ -103,10 +103,10 @@ async def straight(direction: int, distance: int, speed: int, accel: int = 500):
                                 velocity=minDistanceSpeed)
         distanceLeft = distance - \
             abs(motor.relative_position(DriverMotor.LEFT))
-        
+
         if direction == Direction.BACKWARD:
             distanceLeft = - distanceLeft
-            
+
         await motor_pair.move_for_degrees(motor_pair.PAIR_1, distanceLeft, 0, velocity=speed, stop=motor.BRAKE, acceleration=accel)
     else:
         while distance > abs(motor.relative_position(DriverMotor.LEFT)):
@@ -160,8 +160,18 @@ async def turn(direction: int, degrees: int, speed: int, targetYaw: int = -500):
     await runloop.sleep_ms(200)
 
 
+async def setGearsLeft():
+    attachmentMotor(Arm.RIGHT, 15, 500, Direction.UP)
+    await attachmentMotor_async(Arm.LEFT, 15, 500, Direction.DOWN)
+
+
+async def setGearsRight():
+    attachmentMotor(Arm.LEFT, 15, 500, Direction.UP)
+    await attachmentMotor_async(Arm.RIGHT, 15, 500, Direction.DOWN)
+
+
 def attachmentMotor(workerMotor: int, degrees: int, speed: int, direction: int):
-    """workerMotor is AttachMotor.LEFT or AttachMotor.RIGHT
+    """workerMotor is Arm.LEFT or Arm.RIGHT
     direction is Direction.UP, Direction.RIGHT, Direction.FORWARD all equal to 1
     And the others -1 degrees to turn speed with which the motor should turn.
     This function will not wait until the Lift action is performed
@@ -242,5 +252,11 @@ async def main():
         elif color_detected is color.MAGENTA:
             await readyForRun()
             await Run_5()
+            
+"""
+        elif color_detected is color.BLACK:
+            await setGearsLeft()
+            await setGearsRight()
+"""               
 
 runloop.run(main())
