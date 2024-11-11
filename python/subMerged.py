@@ -205,10 +205,48 @@ async def Run_2():
 
 async def Run_3():
     """ This is Run3 ARYAN"""
-    await turn(Direction.RIGHT, 0, 400, 90)
-    return
-    await runloop.sleep_ms(200)
-    await turn(Direction.RIGHT, 0, 500, 90)
+    attachmentMotor(Arm.RIGHT, 200, 500,
+                    Direction.DOWN)        # Lift Shark Arm
+    # While Lifting we move towards the missions
+    await straight(Direction.BACKWARD, 280, 150)
+    await turn(Direction.RIGHT, 15, 100)
+    # While Lifting we move towards the missions
+    await straight(Direction.BACKWARD, 1060, 800, accel=2000)
+    # Hammer the Coral
+    await attachmentMotor_async(Arm.RIGHT, 200, 600, Direction.UP)
+    # Lifting up the Motor After the Coral Hammering
+    attachmentMotor(Arm.RIGHT, 200, 600, Direction.DOWN)
+    await straight(Direction.FORWARD, 160, 300)            # Move back a bit
+    # Turn towards Shark Mission
+    await turn(Direction.LEFT, 0, 300, -60)
+    # Go forward to hit the shark mission
+    await straight(Direction.BACKWARD, 200, 200)
+    # Hit the sharkie
+    await attachmentMotor_async(Arm.RIGHT, 400, 1100, Direction.UP)
+    # Lifting up the Motor After Hitting the sharkie
+    attachmentMotor(Arm.RIGHT, 380, 600, Direction.DOWN)
+    # Then Move back after hitting the shark
+    await straight(Direction.FORWARD, 80, 200)
+    # Turn towards Shark Mission
+    await turn(Direction.RIGHT, 0, 100, 0)
+    # Move toward the shipwreck
+    await straight(Direction.FORWARD, 435, 400)
+    # Turn towards shipwreck
+    await turn(Direction.LEFT, 0, 400, -90)
+    # solve the shipwreck
+    await straight(Direction.FORWARD, 550, 800, justGoFast=1)
+    runloop.sleep_ms(500)
+    # backup from the shipwreck
+    await straight(Direction.BACKWARD, 200, 400)
+    # await straight(Direction.FORWARD, 30, 400)
+    await turn(Direction.RIGHT, 0, 400, 0)
+    await straight(Direction.BACKWARD, 180, 300)
+    await turn(Direction.LEFT, 0, 400, -90)
+    await straight(Direction.BACKWARD, 400, 800, justGoFast=1)
+    await straight(Direction.FORWARD, 200, 300)
+    await turn(Direction.LEFT, 70, 400)        # to home
+    # to home
+    await straight(Direction.BACKWARD, 1200, 1050, accel=2000, justGoFast=1)
 
 
 async def Run_4():
@@ -220,9 +258,8 @@ async def Run_5():
     """ This is Run5 """
     print("This is Run5")
 
+
 # Actual 1000 degrees = 21.377 inches
-
-
 async def main():
     """Main function"""
     global g_yaw
@@ -252,11 +289,10 @@ async def main():
         elif color_detected is color.MAGENTA:
             await readyForRun()
             await Run_5()
-            
-"""
+
         elif color_detected is color.BLACK:
             await setGearsLeft()
             await setGearsRight()
-"""               
+
 
 runloop.run(main())
