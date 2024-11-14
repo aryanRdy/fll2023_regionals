@@ -207,46 +207,34 @@ async def Run_3():
     """ This is Run3 ARYAN"""
     attachmentMotor(Arm.RIGHT, 200, 500,
                     Direction.DOWN)        # Lift Shark Arm
+    # Scuba arm
+    await attachmentMotor_async(Arm.LEFT, 90, 300, Direction.RIGHT)
+    attachmentMotor(Arm.LEFT, 265, 500, Direction.DOWN)        # Scuba arm
     # While Lifting we move towards the missions
     await straight(Direction.BACKWARD, 280, 150)
-    await turn(Direction.RIGHT, 15, 100)
-    # While Lifting we move towards the missions
-    await straight(Direction.BACKWARD, 1060, 800, accel=2000)
-    # Hammer the Coral
-    await attachmentMotor_async(Arm.RIGHT, 200, 600, Direction.UP)
-    # Lifting up the Motor After the Coral Hammering
-    attachmentMotor(Arm.RIGHT, 200, 600, Direction.DOWN)
-    await straight(Direction.FORWARD, 160, 300)            # Move back a bit
-    # Turn towards Shark Mission
-    await turn(Direction.LEFT, 0, 300, -60)
-    # Go forward to hit the shark mission
-    await straight(Direction.BACKWARD, 200, 200)
-    # Hit the sharkie
-    await attachmentMotor_async(Arm.RIGHT, 400, 1100, Direction.UP)
-    # Lifting up the Motor After Hitting the sharkie
-    attachmentMotor(Arm.RIGHT, 380, 600, Direction.DOWN)
-    # Then Move back after hitting the shark
-    await straight(Direction.FORWARD, 80, 200)
-    # Turn towards Shark Mission
-    await turn(Direction.RIGHT, 0, 100, 0)
-    # Move toward the shipwreck
-    await straight(Direction.FORWARD, 435, 400)
-    # Turn towards shipwreck
-    await turn(Direction.LEFT, 0, 400, -90)
-    # solve the shipwreck
-    await straight(Direction.FORWARD, 550, 800, justGoFast=1)
-    runloop.sleep_ms(500)
-    # backup from the shipwreck
-    await straight(Direction.BACKWARD, 200, 400)
-    # await straight(Direction.FORWARD, 30, 400)
-    await turn(Direction.RIGHT, 0, 400, 0)
-    await straight(Direction.BACKWARD, 180, 300)
-    await turn(Direction.LEFT, 0, 400, -90)
-    await straight(Direction.BACKWARD, 400, 800, justGoFast=1)
-    await straight(Direction.FORWARD, 200, 300)
-    await turn(Direction.LEFT, 70, 400)        # to home
-    # to home
-    await straight(Direction.BACKWARD, 1200, 1050, accel=2000, justGoFast=1)
+    await turn(Direction.LEFT, 150, 550)
+    await straight(Direction.FORWARD, 520, 300)
+    await turn(Direction.RIGHT, 0, 500, -90)
+    await straight(Direction.FORWARD, 550, 1000, justGoFast=1)
+    await straight(Direction.BACKWARD, 280, 150)
+    await turn(Direction.RIGHT, 90, 500)
+    await straight(Direction.BACKWARD, 400, 400)
+    await attachmentMotor_async(Arm.LEFT, 103, 300, Direction.RIGHT)
+    await turn(Direction.LEFT, 90, 500)
+    await straight(Direction.BACKWARD, 110, 100)
+    await attachmentMotor_async(Arm.LEFT, 77, 90, Direction.LEFT)
+    await straight(Direction.FORWARD, 200, 400)
+    await straight(Direction.BACKWARD, 260, 1000, justGoFast=1)
+    await straight(Direction.FORWARD, 45, 200, 1000)
+    await turn(Direction.RIGHT, 30, 400)
+    # Hit Shark
+    await attachmentMotor_async(Arm.RIGHT, 300, 1100, Direction.UP)
+    # Lift Shark Arm
+    attachmentMotor(Arm.RIGHT, 200, 500, Direction.DOWN)
+    await straight(Direction.FORWARD, 200, 450, 1000)
+    await turn(Direction.RIGHT, 90, 500)
+    await straight(Direction.BACKWARD, 100, 250, 1000)
+    await attachmentMotor_async(Arm.LEFT, 73, 100, Direction.RIGHT)
 
 
 async def Run_4():
