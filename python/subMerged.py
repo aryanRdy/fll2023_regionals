@@ -193,58 +193,358 @@ async def readyForRun():
     motion_sensor.reset_yaw(0)
 
 
-async def Run_1():
-    """ This is Run1 """
-    print("This is Run1")
+async def speedyRun_1():
+    """ This is speedyRun1 """
+    print("This is speedyRun1")
+
+    #start collecting octopus
+    await straight(Direction.BACKWARD, 100, 900) #moving towards the octopus
+    await turn(Direction.LEFT, 45, 600) # turning towards the octopos
+    await straight(Direction.BACKWARD, 620, 400)
+    await straight(Direction.FORWARD, 100, 800) # octopus falls down, we move towards the next mission
+
+    #start going towards angler fish
+    await turn(Direction.LEFT, 26, 600)
+    await straight(Direction.BACKWARD, 770, 800) # move forward towards the angular mission
+    await turn(Direction.RIGHT, 15 , 600) 
+    await straight(Direction.BACKWARD, 310, 900) # solve the angular mission
+    await turn(Direction.LEFT, 20, 500) # secular the angular mission
+
+    #drop off octopus
+    await turn(Direction.RIGHT, 80, 600)
+    await attachmentMotor_async(port.E, 650, 400, Direction.DOWN)
+
+    # move towards the artifical habitat
+    
+    await turn(Direction.LEFT, 55, 600)
+    await straight(Direction.FORWARD, 890, 500)
+    await turn(Direction.LEFT, 60, 500)
+
+    # ram into the artificial habitat
+    await straight(Direction.BACKWARD, 160, 700)
+
+    #start folding the artificial habitat
+    await turn(Direction.RIGHT, 55, 1050)
+    await straight(Direction.BACKWARD, 420, 900)
+
+    #moving backward to align the robot to the reef
+    await straight(Direction.FORWARD, 160, 900)
+    await turn(Direction.LEFT, 35, 1050)
+    attachmentMotor(port.B, 500, 1000, Direction.DOWN)
+    await straight(Direction.FORWARD, 100, 900)
+
+    # start lifting the artificial habitat
+    await straight(Direction.BACKWARD, 325, 900)
+    await attachmentMotor_async(port.B, 500, 1050, Direction.UP)
+
+    # #get ready for second flick
+    await attachmentMotor_async(port.B, 450, 1000, Direction.DOWN)
+    await straight(Direction.BACKWARD, 145, 900)
+    await attachmentMotor_async(port.B, 500, 1050, Direction.UP)
+
+    # move towards the shipping lane
+    await straight(Direction.FORWARD, 675, 700) # change this line of code if the flicker does not align well with shiping lane mission
+    await turn(Direction.RIGHT, 135, 500)
+
+    #start solving the shipping lane
+    attachmentMotor(port.B, 450, 800, Direction.DOWN)
+    await straight(Direction.BACKWARD, 720, 900)
+    await attachmentMotor_async(port.B, 450, 800, Direction.UP)
+
+    # #pick up the kelp sample
+    await straight(Direction.FORWARD, 100, 700)
+    await turn(Direction.LEFT, 30, 500)
+    await straight(Direction.BACKWARD, 150, 700)
+    await attachmentMotor_async(port.E, 450, 200, Direction.UP)
+    await turn(Direction.LEFT, 15, 750)
+
+    #go home
+    await straight(Direction.FORWARD, 1100, 1000)
 
 
-async def Run_2():
-    """ This is Run2 """
-    print("This is Run2")
+async def backupRun1():
+
+
+    #go towards shipping lanes
+    await straight(Direction.BACKWARD, 800, 500)
+    await turn(Direction.RIGHT, 45, 500)
+    await straight(Direction.BACKWARD, 200, 500)
+    await attachmentMotor_async(port.B, 450, 800, Direction.UP)
+
+    # #pick up the kelp sample
+    await straight(Direction.FORWARD, 100, 500)
+    await turn(Direction.LEFT, 15, 200)
+    await straight(Direction.BACKWARD, 150, 500)
+    attachmentMotor(port.E, 450, 800, Direction.UP)
+    await turn(Direction.LEFT, 15, 200)
+
+    await straight(Direction.FORWARD, 1100, 500)
 
 
 async def Run_3():
     """ This is Run3 ARYAN"""
-    attachmentMotor(Arm.RIGHT, 200, 500,
-                    Direction.DOWN)        # Lift Shark Arm
-    # Scuba arm
-    await attachmentMotor_async(Arm.LEFT, 90, 300, Direction.RIGHT)
-    attachmentMotor(Arm.LEFT, 265, 500, Direction.DOWN)        # Scuba arm
-    # While Lifting we move towards the missions
+    # Scuba diver arm Lift up
+    #attachmentMotor(Arm.LEFT, 200, 300, Direction.DOWN)
+    attachmentMotor(Arm.LEFT, 15, 300, Direction.UP)
+
+
+    # Bring Scuba diver arm to position
+    #await attachmentMotor_async(Arm.LEFT, 200, 500, Direction.DOWN)
+
+    # Start moving forward from the Launch Area
     await straight(Direction.BACKWARD, 280, 150)
-    await turn(Direction.LEFT, 150, 550)
-    await straight(Direction.FORWARD, 520, 300)
-    await turn(Direction.RIGHT, 0, 500, -90)
-    await straight(Direction.FORWARD, 550, 1000, justGoFast=1)
-    await straight(Direction.BACKWARD, 280, 150)
-    await turn(Direction.RIGHT, 90, 500)
-    await straight(Direction.BACKWARD, 400, 400)
-    await attachmentMotor_async(Arm.LEFT, 103, 300, Direction.RIGHT)
-    await turn(Direction.LEFT, 90, 500)
-    await straight(Direction.BACKWARD, 110, 100)
-    await attachmentMotor_async(Arm.LEFT, 77, 90, Direction.LEFT)
-    await straight(Direction.FORWARD, 200, 400)
-    await straight(Direction.BACKWARD, 260, 1000, justGoFast=1)
-    await straight(Direction.FORWARD, 45, 200, 1000)
-    await turn(Direction.RIGHT, 30, 400)
-    # Hit Shark
-    await attachmentMotor_async(Arm.RIGHT, 300, 1100, Direction.UP)
-    # Lift Shark Arm
+
+    # Lift Shark Arm to hit Krakens Treasure puller
     attachmentMotor(Arm.RIGHT, 200, 500, Direction.DOWN)
-    await straight(Direction.FORWARD, 200, 450, 1000)
+
+    # Turn Left to bring Krakens Treasure Arm forward
+    await turn(Direction.LEFT, 0, 550, -150)
+
+    # Now the front face forward, Go forward towards the Krakens Treasure at an angle
+    await straight(Direction.FORWARD, 520, 300)
+
+    # Turn Perfectly towards Krakens Treasure Mission
+    await turn(Direction.RIGHT, 0, 500, -90)
+
+    # Ram fast into the Krakens Treasure Mission capture Box
+    await straight(Direction.FORWARD, 550, 1000, justGoFast=1)
+
+    # Now backup a bit
+    await straight(Direction.BACKWARD, 270, 150)  #from 280
+
+    # Now turn my Motorized attachment Towards North Which is facing 0
     await turn(Direction.RIGHT, 90, 500)
-    await straight(Direction.BACKWARD, 100, 250, 1000)
-    await attachmentMotor_async(Arm.LEFT, 73, 100, Direction.RIGHT)
+
+    # Now go straight with motorized attachment facing forward
+    await straight(Direction.BACKWARD, 415, 400)   #was 400 dis
+
+    # Bring the Scuba Diver Arm to position
+    await attachmentMotor_async(Arm.LEFT, 160, 300, Direction.DOWN)
+
+    await turn(Direction.LEFT, 90, 500)# Now turn towards Scuba Diver
+
+    await straight(Direction.BACKWARD, 115, 100)# Go towards suba diver         110 to 115
+
+    # Lift the scuba Diver
+    await attachmentMotor_async(Arm.LEFT, 100, 90, Direction.UP)
+    
+    #await straight(Direction.FORWARD, 200, 400)# Go back a bit
+
+    # Ram into the coral mission fast
+    #await straight(Direction.BACKWARD, 260, 1000, justGoFast=1)
+    
+    # Ram into the coral mission fast
+    await straight(Direction.BACKWARD, 80, 1000, justGoFast=1)
+
+    # Now After raming, Go back
+    await straight(Direction.FORWARD, 75, 200)
+
+    await turn(Direction.RIGHT, 0, 400, -60)# Turn towards Shark Mission 30
+    await straight(Direction.BACKWARD, 22, 200)  # Go towards Shark to hit
+
+    # Hit the SHark Lever
+    await attachmentMotor_async(Arm.RIGHT, 300, 1100, Direction.UP)
+
+    # Lift the Shark Arm After Shark Mission
+    attachmentMotor(Arm.RIGHT, 200, 500, Direction.DOWN)
+
+    await straight(Direction.FORWARD, 200, 450, 1000)# Back up a bit
+
+    await turn(Direction.RIGHT, 70, 300)    # Turn Towards Coral bud nursery
+    # Go forward towards coral bud nursery
+    await straight(Direction.BACKWARD, 235, 250, 1000)
+    await attachmentMotor_async(Arm.RIGHT, 300, 1100, Direction.UP)  #Hit the coral nursery
+    await attachmentMotor_async(Arm.RIGHT, 300, 1100, Direction.DOWN)#Lift the ARM after hitting the coral nursery
+    await straight(Direction.FORWARD, 20, 100)# Back up a bit
+    await turn(Direction.RIGHT, 30, 500)    # Turn Little more Towards Coral bud nursery to drop Scuba diver
+    # Drop the Scuba diver
+    await attachmentMotor_async(Arm.LEFT, 110, 50, Direction.DOWN)
+
+    #Return home
+    await turn(Direction.LEFT, 20, 500)    # Turn Little more Towards Coral bud nursery to drop Scuba diver
+    await straight(Direction.FORWARD, 2000, 1000, justGoFast=1)
+
+
+async def Run_2():
+    """ This is Run2 """
+
+    await straight(Direction.FORWARD, 50, 900)
+    #turn left to pick up the first krill
+    await turn(Direction.LEFT, 20, 600)
+    await straight(Direction.FORWARD, 500, 900)
+
+    #turn right to pick up the coral
+    await turn(Direction.RIGHT, 30, 600)
+    await straight(Direction.FORWARD, 650, 900) # This will pick up the krill near the whale
+
+    #picking up the last krill
+    await straight(Direction.BACKWARD, 390, 900)
+
+    await turn(Direction.LEFT, 30, 600)
+    await straight(Direction.FORWARD, 330, 900)
+
+    await turn(Direction.RIGHT, 170, 600) # this impacts the turn angle effecting the sonar discovery mission.
+
+    # start turning the motor for attachment
+    await attachmentMotor_async(port.E, 270, 400, Direction.DOWN)
+    # ======#
+    await runloop.sleep_ms(1000)
+    await straight(Direction.BACKWARD, 420, 900) # going towards the mission
+    await attachmentMotor_async(port.E, 60, 400, Direction.UP) # turning the arm a little bit towards the other side
+    await runloop.sleep_ms(750)
+    await straight(Direction.FORWARD, 420, 900)
+
+    # ==== Sonar discovery mission end
+
+
+    await straight(Direction.BACKWARD, 100, 900)
+    await attachmentMotor_async(port.E, 45, 400, Direction.DOWN)  # make the hammer straight
+    await turn(Direction.LEFT, 45, 300) #line up with submersible
+    #await attachmentMotor_async(port.E, 67, 400, Direction.UP)
+    
+
+    # # move forward towards the submersible
+    await straight(Direction.BACKWARD, 300, 900)
+    await attachmentMotor_async(port.E, 60, 400, Direction.UP)
+    await runloop.sleep_ms(500)
+    await straight(Direction.BACKWARD, 550, 900) # HIT THE SUBMERSIBLE
+
+    await straight(Direction.FORWARD, 150, 900)
+    await attachmentMotor_async(port.E, 120, 400, Direction.DOWN)
+    await turn(Direction.LEFT, 10, 600)
+    await straight(Direction.BACKWARD,1000, 900)
+    await turn(Direction.LEFT, 18, 600)
+    await straight(Direction.BACKWARD, 750, 900)
+
+    await turn(Direction.LEFT, 75, 600)
+    await straight(Direction.BACKWARD, 900, 900)
 
 
 async def Run_4():
-    """ This is Run4 """
+    """ This is Run4 Aakash&Aarav- Boat dropping Mission"""
     print("This is Run4")
+    #await attachmentMotor_async(Arm.RIGHT, 200,100, Direction.UP)
+    #await motor.run_for_degrees(port.B, -590,100) # moving attachment arm to the trident
+    await straight(Direction.FORWARD, 300, 100) # moving to the boat mission
+    await straight(Direction.BACKWARD, 500,600) #going back home
+    await runloop.sleep_ms(3000)
+    await turn(Direction.LEFT,0,300,-32) #turning to the trident mission
+    await straight(Direction.FORWARD,1000,500) #moving towards the trident mission
+    await turn(Direction.RIGHT,0,300,0) #turning to the trident mission
+    await straight(Direction.FORWARD,460,500) #moving towards the trident mission (original)
+    await turn(Direction.LEFT,0,300,-45) #turning to the trident mission
+    await straight(Direction.FORWARD,35,500) #moving towards the trident mission
+    await attachmentMotor_async(Arm.LEFT, 650, 500, Direction.DOWN) #arm down to pick trident
+
+    #await turn(Direction.LEFT,3,300) #grip trident?
+    #await turn(Direction.RIGHT,3,300) #one more try to grip
+    await straight(Direction.BACKWARD,10,50)
+    #await attachmentMotor_async(Arm.LEFT, 200, 50, Direction.UP) #move the arm up
+    attachmentMotor(Arm.LEFT, 200, 75, Direction.UP) #move the arm up
+    #await attachmentMotor_async(Arm.LEFT, 200, 300, Direction.UP)
+    await straight(Direction.BACKWARD,100,50)
+
+    ### AFTER TRIDENT ##
+    await turn(Direction.RIGHT,0,300,-10)
+    await straight(Direction.FORWARD,500,500) #moving towards the whale mission
+
+    await turn(Direction.RIGHT,0,300,0)
+    await straight(Direction.FORWARD,900,500) #moving towards the whale mission
+
+    await turn(Direction.RIGHT,0,300,135) #turn 45 after moving to the another start point
+    await straight(Direction.BACKWARD,200,500) #moving towards the whale mission
+    await turn(Direction.LEFT,0,300,90) #turn 90 wrt to start point
+    await straight(Direction.BACKWARD,360,500) #moving towards the whale mission
+    await turn(Direction.RIGHT,0,300,135) #turn to facing the whale mission
+    await straight(Direction.BACKWARD,650,500) #moving towards the whale mission
+    await attachmentMotor_async(Arm.RIGHT, 950,500, Direction.UP) ##Feed the WHALE
+
+
+    #await attachmentMotor_async(Arm.RIGHT, 500,300, Direction.UP)
 
 
 async def Run_5():
     """ This is Run5 """
-    print("This is Run5")
+
+    print("This is Run4_2")
+    """ This is Run4 Aakash&Aarav- NO TRIDENT DROP SHARK"""
+    print("This is Run4_2")
+
+    await straight(Direction.FORWARD, 300,40) # moving to the boat mission FROM HOME2 (slowing to 40)
+    await straight(Direction.BACKWARD, 500,700) #going back home
+    await runloop.sleep_ms(5000) #REMOVE BOAT ATTACHEMENT AND PLACE SHARK ATTACHEMENT
+    await turn(Direction.LEFT,0,500,-32) #turning to the SHARK PLACEMENT
+    await straight(Direction.FORWARD,900,800) #moving towards the SHARK PLACEMENT - STEP 1
+    await turn(Direction.RIGHT,0,500,0) #turning to SHARK PLACEMENT - TURN 1
+    await straight(Direction.FORWARD,400,500) #moving towards SHARK PLACEMENT - STEP 2
+    await turn(Direction.LEFT,0,300,-25) #turning to SHARK PLACEMENT - TURN 2
+    await straight(Direction.FORWARD,240,500) #PLACE THE SHARK
+    await straight(Direction.BACKWARD,210,500) #LEAVE THE SHARK BOX
+    await turn(Direction.RIGHT,0,300,-10) #turning to move to HOME1 - TURN 1
+    await straight(Direction.FORWARD,200,400) #moving towards HOME1 - STEP 1
+
+    await turn(Direction.RIGHT,0,300,0) #turning to move to HOME1 - TURN 2
+
+    #await straight(Direction.FORWARD,1600,800) #moving towards HOME1 - STEP 2
+
+    await straight(Direction.FORWARD,1300,1000, accel=1000) #moving towards HOME1 - STEP 2
+
+    ##----------------##
+    ## HOME1 TO WHALE ##
+    ##----------------##
+    await turn(Direction.RIGHT,0,300,135) #turn 45 after moving to the another start point
+    await straight(Direction.BACKWARD,200,500) #moving towards the whale mission
+    await turn(Direction.LEFT,0,300,90) #turn 90 wrt to start point
+    await straight(Direction.BACKWARD,475,500) #moving towards the whale mission
+
+    await turn(Direction.RIGHT,0,300,135) #turn to facing the whale mission
+    await straight(Direction.BACKWARD,600,500) #moving towards the whale mission
+    await attachmentMotor_async(Arm.RIGHT, 950,500, Direction.UP) ##Feed the WHALE
+
+    '''
+    ##----------------##
+    ## HOME1 TO WHALE ##
+    ##----------------##
+    #await turn(Direction.RIGHT,0,300,135) #turn 45 after moving to the another start point
+    #await straight(Direction.BACKWARD,200,500) #moving towards the whale mission
+
+    await turn(Direction.LEFT,0,500,270) #turn 90 wrt to start point
+
+    await straight(Direction.FORWARD,800,800) #moving towards the whale mission (Can go to 800???)
+    await turn(Direction.RIGHT,0,400,135) #turn to facing the whale mission
+    await straight(Direction.BACKWARD,550,300) #moving towards the whale mission
+    await attachmentMotor_async(Arm.RIGHT, 950,600, Direction.UP) ##Feed the WHALE
+    '''
+    await straight(Direction.FORWARD,300,300) #moving towards the whale mission
+
+
+    '''
+
+    await attachmentMotor_async(Arm.LEFT, 650, 500, Direction.DOWN) #arm down to pick trident
+
+    #await turn(Direction.LEFT,3,300) #grip trident?
+    #await turn(Direction.RIGHT,3,300) #one more try to grip
+    await straight(Direction.BACKWARD,10,50)
+    #await attachmentMotor_async(Arm.LEFT, 200, 50, Direction.UP) #move the arm up
+    attachmentMotor(Arm.LEFT, 200, 75, Direction.UP) #move the arm up
+    #await attachmentMotor_async(Arm.LEFT, 200, 300, Direction.UP)
+    await straight(Direction.BACKWARD,100,50)
+
+    ### AFTER TRIDENT ##
+    await turn(Direction.RIGHT,0,300,-10)
+    await straight(Direction.FORWARD,500,500) #moving towards the whale mission
+
+    await turn(Direction.RIGHT,0,300,0)
+    await straight(Direction.FORWARD,900,500) #moving towards the whale mission
+
+    await turn(Direction.RIGHT,0,300,135) #turn 45 after moving to the another start point
+    await straight(Direction.BACKWARD,200,500) #moving towards the whale mission
+    await turn(Direction.LEFT,0,300,90) #turn 90 wrt to start point
+    await straight(Direction.BACKWARD,360,500) #moving towards the whale mission
+    await turn(Direction.RIGHT,0,300,135) #turn to facing the whale mission
+    await straight(Direction.BACKWARD,650,500) #moving towards the whale mission
+    await attachmentMotor_async(Arm.RIGHT, 950,500, Direction.UP) ##Feed the WHALE
+    '''
 
 
 # Actual 1000 degrees = 21.377 inches
