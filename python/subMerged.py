@@ -195,22 +195,22 @@ async def straight(direction: int, distance: int, speed: int = 1050, accel: int 
     await runloop.sleep_ms(100)
 
 
-async def turn(direction: int, ent_degrees: int, speed: int = -1, targetYaw: int = -500):
+async def turn(direction: int, degrees: int, speed: int = -1, targetYaw: int = -500):
     """Direction is Direction.RIGHT or Direction.LEFT
     degrees: Amount of degrees to turn
     speed: speed at which to turn
     """
     global g_yaw
-    if ent_degrees == 0:
-        degrees = targetYaw-g_yaw
+    if degrees == 0:
+        degreesToTurn = targetYaw-g_yaw
     else:
-        degrees = ent_degrees
+        degreesToTurn = degrees
 
-    if abs(degrees) == 300:
-        degrees = 299
+    if abs(degreesToTurn) == 300:
+        degreesToTurn = 299
 
     if speed == -1:
-        ref_speed = round(abs(degrees) * 9)
+        ref_speed = round(abs(degreesToTurn) * 9)
         if ref_speed > 1050:
             ref_speed = 1050
     else:
@@ -220,24 +220,24 @@ async def turn(direction: int, ent_degrees: int, speed: int = -1, targetYaw: int
 
     tgtYaw = g_yaw
     tgtSpeed = speed
-    origDiff = abs(degrees)
+    origDiff = abs(degreesToTurn)
 
     if targetYaw >= -360 and targetYaw < 0:
         targetYaw = 360 + targetYaw
 
     if targetYaw == -500:
         if direction == Direction.RIGHT:
-            tgtYaw = (g_yaw + abs(degrees)) % 360
+            tgtYaw = (g_yaw + abs(degreesToTurn)) % 360
 
         if direction == Direction.LEFT:
-            tgtYaw = (g_yaw - abs(degrees) + 360) % 360
+            tgtYaw = (g_yaw - abs(degreesToTurn) + 360) % 360
     else:
         tgtYaw = targetYaw
         origDiff = angleDiff(targetYaw)
 
     easing = SineEaseIn(start=ref_speed, end=200, duration=1)
 
-    while (agdiff := angleDiff(tgtYaw)) > (round(speed/(300-abs(degrees)))+6.9):
+    while (agdiff := angleDiff(tgtYaw)) > (round(speed/(300-abs(degreesToTurn)))+6.9):
         alpha = min(1 - (agdiff / origDiff), 1)
         # Use easing function to calculate the current speed
         tgtSpeed = int(easing(alpha))
@@ -383,7 +383,8 @@ async def main():
     motor_pair.pair(motor_pair.PAIR_1, DriverMotor.LEFT, DriverMotor.RIGHT)
 
     a = time.ticks_ms()
-    await Run_1()
+    await turn(direction=Direction.LEFT, degrees=10, speed=200, targetYaw=-10)
+    # await Run_1()
     # await Run_2()
     b = time.ticks_ms()
     print("Time it took to run Run_2 is ", (b-a)/1000, " Seconds\n")
