@@ -408,39 +408,62 @@ async def straight(direction: int, distance: int, speed: int = 1050, accel: int 
     await runloop.sleep_ms(100)
 
 
-async def turn(direction: int, degrees: int, speed: int, targetYaw: int = -500):
+async def turn(direction: int, ent_degrees: int, speed: int = -1, targetYaw: int = -500):
     """Direction is Direction.RIGHT or Direction.LEFT
     degrees: Amount of degrees to turn
     speed: speed at which to turn
     """
     global g_yaw
+    if ent_degrees == 0:
+        degrees = targetYaw-g_yaw
+    else:
+        degrees = ent_degrees
+
+    if abs(degrees) == 300:
+        degrees = 299
+
+    if speed == -1:
+        ref_speed = round(abs(degrees) * 9)
+        if ref_speed > 1050:
+            ref_speed = 1050
+    else:
+        ref_speed = speed
+
+    ref_speed = abs(ref_speed)
+
     tgtYaw = g_yaw
     tgtSpeed = speed
     origDiff = abs(degrees)
-    minSpeed = 100
 
     if targetYaw >= -360 and targetYaw < 0:
         targetYaw = 360 + targetYaw
 
     if targetYaw == -500:
         if direction == Direction.RIGHT:
-            tgtYaw = (g_yaw + degrees) % 360
+            tgtYaw = (g_yaw + abs(degrees)) % 360
 
         if direction == Direction.LEFT:
-            tgtYaw = (g_yaw - degrees + 360) % 360
+            tgtYaw = (g_yaw - abs(degrees) + 360) % 360
     else:
         tgtYaw = targetYaw
         origDiff = angleDiff(targetYaw)
 
-    while (agdiff := angleDiff(tgtYaw)) > 0:
-        tgtSpeed = int(max((agdiff/origDiff) * speed, minSpeed))
-        # We need to turn both wheels backwards to turn Right
-        motor.run(DriverMotor.LEFT, tgtSpeed * direction * -1)
-        motor.run(DriverMotor.RIGHT, tgtSpeed * direction * -1)
+    easing = SineEaseIn(start=ref_speed, end=200, duration=1)
+
+    while (agdiff := angleDiff(tgtYaw)) > (round(speed/(300-abs(degrees)))+6.9):
+        alpha = min(1 - (agdiff / origDiff), 1)
+        # Use easing function to calculate the current speed
+        tgtSpeed = int(easing(alpha))
+
+        if tgtSpeed < 200:
+            tgtSpeed = 200
+        # tgtSpeed = int(max((agdiff/origDiff) * speed, minSpeed))
+        motor_pair.move_tank(motor_pair.PAIR_1, tgtSpeed * direction,
+                             tgtSpeed * direction * -1, acceleration=2000)
 
     motor_pair.stop(motor_pair.PAIR_1, stop=motor.SMART_BRAKE)
     g_yaw = tgtYaw  # Save the target yaw into our Global yaw.
-    await runloop.sleep_ms(100)
+    await runloop.sleep_ms(200)
 
 
 async def setGearsLeft():
@@ -516,11 +539,11 @@ async def Run_2():
     # Lift the arm after dropping the Coral Tree
     await attachmentMotor_async(Arm.RIGHT, 40, 300, Direction.UP)
     # Turn Right
-    await turn(Direction.RIGHT, 0, 400, targetYaw=45)
+    await turn(Direction.RIGHT, 0, -1, targetYaw=45)
     # Go At 45 degrees So we can turn towards the scuba diver
     await straight(Direction.BACKWARD, 750, 800)
     # Turn towards the Scuba diver mission
-    await turn(Direction.LEFT, 0, 1000, targetYaw=-90)
+    await turn(Direction.LEFT, 0, -1, targetYaw=-90)
     # Parallely bend down so that easy to lift the scuba diver
     attachmentMotor(Arm.RIGHT, 35, 300, Direction.DOWN)
     # Move towards the Scuba diver mission
@@ -531,24 +554,25 @@ async def Run_2():
     await attachmentMotor_async(Arm.LEFT, 280, 1000, Direction.UP)
     # Lift the Shark arm completely back
     attachmentMotor(Arm.LEFT, 300, 1000, Direction.DOWN)
-    # Move towards the Scuba diver mission
-    await straight(Direction.FORWARD, 125, 300)
+    # Back up from the Scuba diver mission
+    # Use to be 125 changed the distance to 150
+    await straight(Direction.FORWARD, distance=150, speed=300)
     a = time.ticks_us()
     # Turn Right to face the coral nursery
-    await turn(Direction.RIGHT, 0, 1000, targetYaw=0)
+    await turn(Direction.RIGHT, 0, -1, targetYaw=0)
     b = time.ticks_us()
     print("Time took to turn towards coral nursery is ",
           (b-a)/1000000, " seconds.")
     # Move towards the Coral Nursery
-    await straight(Direction.BACKWARD, 220, 300)
+    await straight(Direction.BACKWARD, 230, 300)
     # Hit the Coral Nursery
-    await attachmentMotor_async(Arm.LEFT, 250, 1000, Direction.UP)
+    await attachmentMotor_async(Arm.LEFT, degrees=250, speed=1000, direction=Direction.UP)
     # After hitting the coral nursery lift the ARM
     await attachmentMotor_async(Arm.LEFT, 100, 1000, Direction.DOWN)
     # Move Away from the Coral Nursery
-    await straight(Direction.FORWARD, 120, 300)
+    await straight(Direction.FORWARD, 130, 300)
     # Turn towards the post of the scuba diver or cora nursery
-    await turn(Direction.RIGHT, 0, 400, targetYaw=60)
+    await turn(Direction.RIGHT, 0, -1, targetYaw=60)
     # Move towards the Coral Nursery
     await straight(Direction.BACKWARD, 150, 300)
     # Deliver the scuba diver
@@ -556,7 +580,7 @@ async def Run_2():
     # After delivering scuba diver go back a bit
     await straight(Direction.FORWARD, 150, 300)
     # Turn away from coral nurssery
-    await turn(Direction.LEFT, 0, 400, targetYaw=10)
+    await turn(Direction.LEFT, 0, -1, targetYaw=10)
 
     # Back to home in Arch turn.
     motor_pair.move_for_degrees(
@@ -573,6 +597,7 @@ async def main():
 
     a = time.ticks_ms()
     await Run_1()
+    # await Run_2()
     b = time.ticks_ms()
     print("Time it took to run Run_2 is ", (b-a)/1000, " Seconds\n")
 
