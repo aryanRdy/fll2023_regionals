@@ -126,61 +126,38 @@ def get_yaw() -> int:
 
 
 def angleDiff(direction, init_yaw, tgt_yaw, prev_diff=361):
-    """Give the angle difference between current yaw and target yaw
-    There are 4 Cases Here:
-        1. When turnnig Right and When current yaw is 350 and Target yaw is 30
-        2. When turning Left and When current yaw is 10 and Target yaw is 350
-        3. When turning Right and When target yaw is 90 and current yaw is 30
-        4. When turning Left and When target yaw is 270 and current yaw is 350
-"""
+    """Calculate the angle difference between current yaw and target yaw.
+    Handles cases where yaw crosses the 0/360 boundary.
+    Args:
+        direction (int): Direction.RIGHT or Direction.LEFT
+        init_yaw (int): Initial yaw angle
+        tgt_yaw (int): Target yaw angle
+        prev_diff (int): Previous difference to check for overshoot
+    Returns:
+        int: Angle difference or -1 if overshoot occurs
+    """
     cur_yaw = get_yaw()
     if direction == Direction.RIGHT:
         if init_yaw < tgt_yaw:
             diff = tgt_yaw - cur_yaw
-            if diff < prev_diff:
-                prev_diff = diff
-                return diff
-            else:
-                return -1  # Init yaw is 10 and target yaw is 5, If we overshoot that target Yaw then we will have to take another
-            # turn instead just return -1 indicating we overshoot.
         else:
-            if cur_yaw >= init_yaw and cur_yaw <= 360:
+            if cur_yaw >= init_yaw:
                 diff = 360 - cur_yaw + tgt_yaw
-                if diff < prev_diff:
-                    prev_diff = diff
-                    return diff
-                else:
-                    return -1
             else:
                 diff = tgt_yaw - cur_yaw
-                if diff < prev_diff:
-                    prev_diff = diff
-                    return diff
-                else:
-                    return -1
-    else:  # When turning Left
+    else:  # Direction.LEFT
         if init_yaw > tgt_yaw:
             diff = cur_yaw - tgt_yaw
-            if diff < prev_diff:
-                prev_diff = diff
-                return diff
-            else:
-                return -1
         else:
-            if cur_yaw <= init_yaw and cur_yaw >= 0:
+            if cur_yaw <= init_yaw:
                 diff = cur_yaw + 360 - tgt_yaw
-                if diff < prev_diff:
-                    prev_diff = diff
-                    return diff
-                else:
-                    return -1
             else:
                 diff = cur_yaw - tgt_yaw
-                if diff < prev_diff:
-                    prev_diff = diff
-                    return diff
-                else:
-                    return -1
+
+    if diff < prev_diff:
+        return diff
+    else:
+        return -1  # Indicating overshoot
 
 
 async def straight(direction: int, distance: int, speed: int = 1050, accel: int = 2000):
