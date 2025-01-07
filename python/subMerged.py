@@ -76,8 +76,6 @@ class SineEaseInOut(EasingBase):
 
 # end ese in ease out
 
-
-onlyOnce = 0
 g_yaw = 0  # Define the global variable at the module level
 
 
@@ -127,7 +125,7 @@ def get_yaw() -> int:
     return yaw
 
 
-def angleDiff(tgt_yaw):
+def angleDiff(direction, init_yaw, tgt_yaw, prev_diff=361):
     """Give the angle difference between current yaw and target yaw
     There are 4 Cases Here:
         1. When turnnig Right and When current yaw is 350 and Target yaw is 30
@@ -136,23 +134,59 @@ def angleDiff(tgt_yaw):
         4. When turning Left and When target yaw is 270 and current yaw is 350
 """
     cur_yaw = get_yaw()
-    # right turn for robot and crossing 360 degree boundry
-    if tgt_yaw < 90 and cur_yaw > 270:
-        return 360 - cur_yaw + tgt_yaw
-    # left turn for robot and crossing 360 degree boundry
-    elif cur_yaw < 90 and tgt_yaw > 270:
-        return 360 - tgt_yaw + cur_yaw
-    elif tgt_yaw > cur_yaw:
-        return tgt_yaw - cur_yaw
-
-    return cur_yaw - tgt_yaw
+    if direction == Direction.RIGHT:
+        if init_yaw < tgt_yaw:
+            diff = tgt_yaw - cur_yaw
+            if diff < prev_diff:
+                prev_diff = diff
+                return diff
+            else:
+                return -1  # Init yaw is 10 and target yaw is 5, If we overshoot that target Yaw then we will have to take another
+            # turn instead just return -1 indicating we overshoot.
+        else:
+            if cur_yaw >= init_yaw and cur_yaw <= 360:
+                diff = 360 - cur_yaw + tgt_yaw
+                if diff < prev_diff:
+                    prev_diff = diff
+                    return diff
+                else:
+                    return -1
+            else:
+                diff = tgt_yaw - cur_yaw
+                if diff < prev_diff:
+                    prev_diff = diff
+                    return diff
+                else:
+                    return -1
+    else:  # When turning Left
+        if init_yaw > tgt_yaw:
+            diff = cur_yaw - tgt_yaw
+            if diff < prev_diff:
+                prev_diff = diff
+                return diff
+            else:
+                return -1
+        else:
+            if cur_yaw <= init_yaw and cur_yaw >= 0:
+                diff = cur_yaw + 360 - tgt_yaw
+                if diff < prev_diff:
+                    prev_diff = diff
+                    return diff
+                else:
+                    return -1
+            else:
+                diff = cur_yaw - tgt_yaw
+                if diff < prev_diff:
+                    prev_diff = diff
+                    return diff
+                else:
+                    return -1
 
 
 async def straight(direction: int, distance: int, speed: int = 1050, accel: int = 2000):
     """ Drives straight with acceleration and deceleration."""
     global g_yaw
     tgtYaw = g_yaw
-    global onlyOnce
 
     # Resets the relative position of one of the wheels
     motor.reset_relative_position(DriverMotor.LEFT, 0)
@@ -179,9 +213,6 @@ async def straight(direction: int, distance: int, speed: int = 1050, accel: int 
         if true_speed < 400:
             true_speed = 400
 
-        # if onlyOnce is 0:
-        #    print ("true_speed=",true_speed, " drift", drift, " Ratio of distance travelled ", current_distance/distance)
-
         if direction == Direction.BACKWARD:
             motor_pair.move(motor_pair.PAIR_1, drift,
                             velocity=true_speed * -1, acceleration=accel)
@@ -191,7 +222,6 @@ async def straight(direction: int, distance: int, speed: int = 1050, accel: int 
 
     # Stops the motors after the loop
     motor_pair.stop(motor_pair.PAIR_1, stop=motor.HOLD)
-    onlyOnce = 1
     await runloop.sleep_ms(100)
 
 
