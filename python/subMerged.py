@@ -283,43 +283,6 @@ async def turn(direction: int, degrees: int, speed: int = -1, targetYaw: int = -
           tgtSpeed, ", ", get_yaw(), ", ", agdiff, " Error = ", error * origDiff)
 
 
-async def turn_old(direction: int, degrees: int, speed: int, targetYaw: int = -500):
-    """Direction is Direction.RIGHT or Direction.LEFT
-    degrees: Amount of degrees to turn
-    speed: speed at which to turn
-    """
-    global g_yaw
-    tgtYaw = g_yaw
-    tgtSpeed = speed
-    origDiff = abs(degrees)
-    minSpeed = 200
-
-    prev_diff = 1000
-
-    if targetYaw >= -360 and targetYaw < 0:
-        targetYaw = 360 + targetYaw
-
-    if targetYaw == -500:
-        if direction == Direction.RIGHT:
-            tgtYaw = (g_yaw + degrees) % 360
-
-        if direction == Direction.LEFT:
-            tgtYaw = (g_yaw - degrees + 360) % 360
-    else:
-        tgtYaw = targetYaw
-        prev_diff = origDiff = angleDiff(direction, g_yaw, tgtYaw, prev_diff)
-
-    while (agdiff := angleDiff(direction, g_yaw, tgtYaw, prev_diff)) > 0:
-        tgtSpeed = int(max((agdiff/origDiff) * speed, minSpeed))
-        # We need to turn both wheels backwards to turn Right
-        motor.run(DriverMotor.LEFT, tgtSpeed * direction * -1)
-        motor.run(DriverMotor.RIGHT, tgtSpeed * direction * -1)
-
-    motor_pair.stop(motor_pair.PAIR_1, stop=motor.SMART_BRAKE)
-    g_yaw = tgtYaw  # Save the target yaw into our Global yaw.
-    await runloop.sleep_ms(100)
-
-
 async def setGearsLeft():
     attachmentMotor(Arm.RIGHT, 15, 500, Direction.UP)
     await attachmentMotor_async(Arm.LEFT, 15, 500, Direction.DOWN)
