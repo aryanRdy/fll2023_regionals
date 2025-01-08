@@ -1,4 +1,5 @@
 from asyncio import run, sleep_ms
+from app import linegraph
 from hub import port
 from hub import motion_sensor
 import motor
@@ -125,7 +126,7 @@ def get_yaw() -> int:
     return yaw
 
 
-def angleDiff(direction, init_yaw, tgt_yaw, prev_diff=361):
+def angleDiff(direction: int, init_yaw: int, tgt_yaw: int, prev_diff: int) -> int:
     """Calculate the angle difference between current yaw and target yaw.
     Handles cases where yaw crosses the 0/360 boundary.
     Args:
@@ -154,7 +155,7 @@ def angleDiff(direction, init_yaw, tgt_yaw, prev_diff=361):
             else:
                 diff = cur_yaw - tgt_yaw
 
-    if diff < prev_diff:
+    if diff <= prev_diff:
         return diff
     else:
         return -1  # Indicating overshoot
@@ -202,28 +203,22 @@ async def straight(direction: int, distance: int, speed: int = 1050, accel: int 
     await runloop.sleep_ms(100)
 
 
-async def turn(direction: int, degrees: int, speed: int = -1, targetYaw: int = -500):
+async def turn(direction: int, degrees: int, speed: int = -1, targetYaw: int = -500, error: float = 0.01):
     """Direction is Direction.RIGHT or Direction.LEFT
     degrees: Amount of degrees to turn
     speed: speed at which to turn
     """
+    prev_diff = 1000
     global g_yaw
+    minSpeed = 200
+
     if degrees == 0:
         degreesToTurn = targetYaw-g_yaw
     else:
         degreesToTurn = degrees
 
-    if abs(degreesToTurn) == 300:
-        degreesToTurn = 299
-
     if speed == -1:
-        ref_speed = round(abs(degreesToTurn) * 9)
-        if ref_speed > 1050:
-            ref_speed = 1050
-    else:
-        ref_speed = speed
-
-    ref_speed = abs(ref_speed)
+        speed = 1000
 
     tgtYaw = g_yaw
     tgtSpeed = speed
@@ -240,24 +235,89 @@ async def turn(direction: int, degrees: int, speed: int = -1, targetYaw: int = -
             tgtYaw = (g_yaw - abs(degreesToTurn) + 360) % 360
     else:
         tgtYaw = targetYaw
-        origDiff = angleDiff(targetYaw)
+        prev_diff = origDiff = angleDiff(direction, g_yaw, tgtYaw, prev_diff)
+    # Adjust duration based on turn size
+    duration = max(0.8, (origDiff / 360) * 1.5)
+    easing = CubicEaseIn(start=speed, end=minSpeed, duration=duration)
 
-    easing = SineEaseIn(start=ref_speed, end=200, duration=1)
+    i = time.ticks_us()
+    prevYaw = get_yaw()
+    linegraph.clear_all()
+    while (agdiff := angleDiff(direction, g_yaw, tgtYaw, prev_diff)) > int(error * origDiff):
+        prev_diff = agdiff
+        if ((curYaw := get_yaw()) != prevYaw):
+            print("Begin ", time.ticks_us() - i, ", ", tgtSpeed,
+                  ", ", curYaw, ", ", agdiff)
+            prevYaw = curYaw
 
-    while (agdiff := angleDiff(tgtYaw)) > (round(speed/(300-abs(degreesToTurn)))+6.9):
         alpha = min(1 - (agdiff / origDiff), 1)
         # Use easing function to calculate the current speed
         tgtSpeed = int(easing(alpha))
 
-        if tgtSpeed < 200:
-            tgtSpeed = 200
-        # tgtSpeed = int(max((agdiff/origDiff) * speed, minSpeed))
+        if tgtSpeed < minSpeed:
+            tgtSpeed = minSpeed
+
+        # tgtSpeed = int(max((agdiff/origDiff) * ref_speed, minSpeed))
+
         motor_pair.move_tank(motor_pair.PAIR_1, tgtSpeed * direction,
-                             tgtSpeed * direction * -1, acceleration=2000)
+                             tgtSpeed * direction * -1, acceleration=1000)
+        # motor.run(DriverMotor.LEFT, tgtSpeed * direction * -1)
+        # motor.run(DriverMotor.RIGHT, tgtSpeed * direction * -1)
+
+        # Debugging output: track yaw changes
+        if ((curYaw := get_yaw()) != prevYaw):
+            print("End   ", time.ticks_us() - i, ", ", tgtSpeed,
+                  ", ", get_yaw(), ", ", agdiff)
+            prevYaw = get_yaw()
+        linegraph.plot(color.RED, agdiff, tgtSpeed)
+
+    print("Stop issued at", time.ticks_us() - i, ", ",
+          tgtSpeed, ", ", get_yaw(), ", ", agdiff)
+
+    motor_pair.stop(motor_pair.PAIR_1, stop=motor.HOLD)
+    # linegraph.plot(color.GREEN, time.ticks_us()-i, agdiff)
+
+    g_yaw = tgtYaw  # Save the target yaw into our Global yaw.
+    await runloop.sleep_ms(200)
+    print("Final ", time.ticks_us() - i, ", ",
+          tgtSpeed, ", ", get_yaw(), ", ", agdiff, " Error = ", error * origDiff)
+
+
+async def turn_old(direction: int, degrees: int, speed: int, targetYaw: int = -500):
+    """Direction is Direction.RIGHT or Direction.LEFT
+    degrees: Amount of degrees to turn
+    speed: speed at which to turn
+    """
+    global g_yaw
+    tgtYaw = g_yaw
+    tgtSpeed = speed
+    origDiff = abs(degrees)
+    minSpeed = 200
+
+    prev_diff = 1000
+
+    if targetYaw >= -360 and targetYaw < 0:
+        targetYaw = 360 + targetYaw
+
+    if targetYaw == -500:
+        if direction == Direction.RIGHT:
+            tgtYaw = (g_yaw + degrees) % 360
+
+        if direction == Direction.LEFT:
+            tgtYaw = (g_yaw - degrees + 360) % 360
+    else:
+        tgtYaw = targetYaw
+        prev_diff = origDiff = angleDiff(direction, g_yaw, tgtYaw, prev_diff)
+
+    while (agdiff := angleDiff(direction, g_yaw, tgtYaw, prev_diff)) > 0:
+        tgtSpeed = int(max((agdiff/origDiff) * speed, minSpeed))
+        # We need to turn both wheels backwards to turn Right
+        motor.run(DriverMotor.LEFT, tgtSpeed * direction * -1)
+        motor.run(DriverMotor.RIGHT, tgtSpeed * direction * -1)
 
     motor_pair.stop(motor_pair.PAIR_1, stop=motor.SMART_BRAKE)
     g_yaw = tgtYaw  # Save the target yaw into our Global yaw.
-    await runloop.sleep_ms(200)
+    await runloop.sleep_ms(100)
 
 
 async def setGearsLeft():
@@ -390,7 +450,10 @@ async def main():
     motor_pair.pair(motor_pair.PAIR_1, DriverMotor.LEFT, DriverMotor.RIGHT)
 
     a = time.ticks_ms()
-    await turn(direction=Direction.LEFT, degrees=10, speed=200, targetYaw=-10)
+    # await turn(direction=Direction.LEFT, degrees=0, speed=800, targetYaw=90, error=0.075)
+    await turn(direction=Direction.RIGHT, degrees=0, speed=500, targetYaw=90, error=0.075)
+
+    # await turn_old(direction=Direction.RIGHT, degrees=0, speed=500, targetYaw=90)
     # await Run_1()
     # await Run_2()
     b = time.ticks_ms()
