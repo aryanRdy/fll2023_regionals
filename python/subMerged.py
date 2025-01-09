@@ -125,39 +125,25 @@ def get_yaw() -> int:
     return yaw
 
 
-def angleDiff(direction: int, init_yaw: int, tgt_yaw: int, prev_diff: int) -> int:
-    """Calculate the angle difference between current yaw and target yaw.
-    Handles cases where yaw crosses the 0/360 boundary.
-    Args:
-        direction (int): Direction.RIGHT or Direction.LEFT
-        init_yaw (int): Initial yaw angle
-        tgt_yaw (int): Target yaw angle
-        prev_diff (int): Previous difference to check for overshoot
-    Returns:
-        int: Angle difference or -1 if overshoot occurs
-    """
+def angleDiff(tgt_yaw):
+    """Give the angle difference between current yaw and target yaw
+    There are 4 Cases Here:
+        1. When turnnig Right and When current yaw is 350 and Target yaw is 30
+        2. When turning Left and When current yaw is 10 and Target yaw is 350
+        3. When turning Right and When target yaw is 90 and current yaw is 30
+        4. When turning Left and When target yaw is 270 and current yaw is 350
+"""
     cur_yaw = get_yaw()
-    if direction == Direction.RIGHT:
-        if init_yaw < tgt_yaw:
-            diff = tgt_yaw - cur_yaw
-        else:
-            if cur_yaw >= init_yaw:
-                diff = 360 - cur_yaw + tgt_yaw
-            else:
-                diff = tgt_yaw - cur_yaw
-    else:  # Direction.LEFT
-        if init_yaw > tgt_yaw:
-            diff = cur_yaw - tgt_yaw
-        else:
-            if cur_yaw <= init_yaw:
-                diff = cur_yaw + 360 - tgt_yaw
-            else:
-                diff = cur_yaw - tgt_yaw
+    # right turn for robot and crossing 360 degree boundry
+    if tgt_yaw < 90 and cur_yaw > 270:
+        return 360 - cur_yaw + tgt_yaw
+    # left turn for robot and crossing 360 degree boundry
+    elif cur_yaw < 90 and tgt_yaw > 270:
+        return 360 - tgt_yaw + cur_yaw
+    elif tgt_yaw > cur_yaw:
+        return tgt_yaw - cur_yaw
 
-    if diff <= prev_diff:
-        return diff
-    else:
-        return -1  # Indicating overshoot
+    return cur_yaw - tgt_yaw
 
 
 async def straight(direction: int, distance: int, speed: int = 1050, accel: int = 2000):
@@ -202,21 +188,22 @@ async def straight(direction: int, distance: int, speed: int = 1050, accel: int 
     await runloop.sleep_ms(100)
 
 
-async def turn(direction: int, degrees: int, speed: int = -1, targetYaw: int = -500):
+async def turn(direction: int, ent_degrees: int, speed: int = -1, targetYaw: int = -500):
     """Direction is Direction.RIGHT or Direction.LEFT
     degrees: Amount of degrees to turn
     speed: speed at which to turn
     """
     global g_yaw
-    prev_diff = 1000
-
-    if degrees == 0:
-        degreesToTurn = targetYaw-g_yaw
+    if ent_degrees == 0:
+        degrees = targetYaw-g_yaw
     else:
-        degreesToTurn = degrees
+        degrees = ent_degrees
+
+    if abs(degrees) == 300:
+        degrees = 299
 
     if speed == -1:
-        ref_speed = round(abs(degreesToTurn) * 9)
+        ref_speed = round(abs(degrees) * 9)
         if ref_speed > 1050:
             ref_speed = 1050
     else:
@@ -226,24 +213,24 @@ async def turn(direction: int, degrees: int, speed: int = -1, targetYaw: int = -
 
     tgtYaw = g_yaw
     tgtSpeed = speed
-    origDiff = abs(degreesToTurn)
+    origDiff = abs(degrees)
 
     if targetYaw >= -360 and targetYaw < 0:
         targetYaw = 360 + targetYaw
 
     if targetYaw == -500:
         if direction == Direction.RIGHT:
-            tgtYaw = (g_yaw + abs(degreesToTurn)) % 360
+            tgtYaw = (g_yaw + abs(degrees)) % 360
 
         if direction == Direction.LEFT:
-            tgtYaw = (g_yaw - abs(degreesToTurn) + 360) % 360
+            tgtYaw = (g_yaw - abs(degrees) + 360) % 360
     else:
         tgtYaw = targetYaw
-        prev_diff = origDiff = angleDiff(direction, g_yaw, tgtYaw, prev_diff)
+        origDiff = angleDiff(targetYaw)
 
     easing = SineEaseIn(start=ref_speed, end=200, duration=1)
 
-    while (agdiff := angleDiff(direction, g_yaw, tgtYaw, prev_diff)) > (round(speed/(360-abs(degreesToTurn)))+5.9):
+    while (agdiff := angleDiff(tgtYaw)) > (round(speed/(300-abs(degrees)))+6.9):
         alpha = min(1 - (agdiff / origDiff), 1)
         # Use easing function to calculate the current speed
         tgtSpeed = int(easing(alpha))
@@ -388,20 +375,11 @@ async def main():
     motion_sensor.reset_yaw(0)
     motor_pair.pair(motor_pair.PAIR_1, DriverMotor.LEFT, DriverMotor.RIGHT)
 
-    angles = [10, 20, 30, 40, 50, 60, 90, 150, 190]
-
-    for angle in angles:
-        g_yaw = 0
-        motion_sensor.reset_yaw(0)
-        a = time.ticks_ms()
-        await turn(Direction.RIGHT, angle, -1)
-        # await turn_new(Direction.RIGHT, angle, -1)
-        b = time.ticks_ms()
-        print("Time it took to turn ", angle,
-              " degrees is ", (b - a)/1000, " seconds")
-        print("Angle=", angle, " Current Yaw=", get_yaw(), " error=",
-              angleDiff(Direction.RIGHT, g_yaw, angle, prev_diff=1000), "\n")
-        await runloop.sleep_ms(1000)
+    a = time.ticks_ms()
+    await Run_1()
+    # await Run_2()
+    b = time.ticks_ms()
+    print("Time it took to run Run_2 is ", (b-a)/1000, " Seconds\n")
 
     return
 
