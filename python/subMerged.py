@@ -212,6 +212,7 @@ async def turn(direction: int, degrees: int, speed: int = -1, targetYaw: int = -
         speed: Speed at which to turn
         targetYaw: The final yaw angle to turn to (if provided)
     """
+    a = time.ticks_ms()
 
     global g_yaw  # Current yaw
     global prev_diff
@@ -225,12 +226,12 @@ async def turn(direction: int, degrees: int, speed: int = -1, targetYaw: int = -
     else:  # then targetYaw is provided
         targetYaw %= 360
 
-    if speed == -1:
-        speed = 1050
-
     origDiff = angleDiff(direction, targetYaw, g_yaw, update=False)
 
-    easing = SineEaseIn(start=speed, end=200, duration=1)
+    if speed == -1:
+        speed = int(origDiff * 8.75)
+
+    easing = SineEaseIn(start=speed, end=100, duration=1)
     debug = 0
     if debug == 1:
         print("direction=", direction, " g_yaw=", g_yaw, " Current Yaw=",
@@ -238,28 +239,43 @@ async def turn(direction: int, degrees: int, speed: int = -1, targetYaw: int = -
         print("targertYaw=", targetYaw, " anglediff of current=", angleDiff(
             direction, targetYaw, update=False), " prev_diff=", prev_diff, " SPeed=", speed)
 
-    error = (round(speed/(360-(origDiff/4)))+7)
+    # error = (round(speed/(360-(origDiff/5))+4+0.0022*(degrees/45)))
     error = 0
+    if origDiff < 60:
+        error = 0.45 * origDiff
+    elif origDiff < 85:
+        error = 0.385 * origDiff
+    elif origDiff >= 85 and origDiff < 100:
+        error = 0.145 * origDiff
+    elif origDiff >= 100 and origDiff <= 118:
+        error = 0.109 * origDiff
+    elif origDiff > 118 and origDiff <= 129:
+        error = 0.05 * origDiff
+    elif origDiff > 130:
+        error = 0.025 * origDiff
+
     # print ("Error=",error)
     while (agdiff := angleDiff(direction, targetYaw)) > error:
         alpha = min(1 - (agdiff / origDiff), 1)
         # Use easing function to calculate the current speed
         tgtSpeed = int(easing(alpha))
 
-        if tgtSpeed < 200:
-            tgtSpeed = 200
+        if tgtSpeed < 100:
+            tgtSpeed = 100
         # tgtSpeed = int(max((agdiff/origDiff) * speed, minSpeed))
         motor_pair.move_tank(motor_pair.PAIR_1, tgtSpeed * direction,
                              tgtSpeed * direction * -1, acceleration=2000)
-        # print("Agdiff:",agdiff, " speed=",tgtSpeed)
+        # print("speed=",tgtSpeed,"Agdiff:",agdiff)
 
     motor_pair.stop(motor_pair.PAIR_1, stop=motor.HOLD)
+
     initangle = g_yaw
+
     g_yaw = targetYaw  # Save the target yaw into our Global yaw.
     await runloop.sleep_ms(200)
-    # print ("Updated Global yaw=",g_yaw, "targetYaw=",targetYaw," curr yaw=",get_yaw() ," error=",angleDiff(direction, g_yaw, update=False), "\nEndTurn\n")
-    print("Start Angle=", initangle, "Target Angle=", targetYaw, " Actual Reached Angle=",
-          get_yaw(), "Speed=", speed, " error=", angleDiff(direction, g_yaw, update=False))
+    b = time.ticks_ms()
+    print("Start Angle=", initangle, "Target Angle=", targetYaw, " Actual Reached Angle=", get_yaw(
+    ), "Speed=", speed, " error=", angleDiff(direction, g_yaw, update=False), " Time=", (b-a)/1000, " Seconds")
 
 
 async def setGearsLeft():
@@ -324,7 +340,7 @@ async def Run_2():
     # Lift the arm after dropping the Coral Tree
     await attachmentMotor_async(Arm.RIGHT, 40, 300, Direction.UP)
     # Turn Right
-    await turn(Direction.RIGHT, 0, 500, targetYaw=40)
+    await turn(Direction.RIGHT, 0, 500, targetYaw=45)
     # Go At 45 degrees So we can turn towards the scuba diver
     await straight(Direction.BACKWARD, 750, 800)
     # Turn towards the Scuba diver mission
@@ -345,13 +361,13 @@ async def Run_2():
     # Turn Right to face the coral nursery
     await turn(Direction.RIGHT, 0, -1, targetYaw=0)
     # Move towards the Coral Nursery
-    await straight(Direction.BACKWARD, 250, 300)                    # 230
+    await straight(Direction.BACKWARD, 260, 300)                    # 230
     # Hit the Coral Nursery
-    await attachmentMotor_async(Arm.LEFT, degrees=250, speed=1000, direction=Direction.UP)
+    await attachmentMotor_async(Arm.LEFT, degrees=255, speed=1000, direction=Direction.UP)
     # After hitting the coral nursery lift the ARM
     await attachmentMotor_async(Arm.LEFT, 100, 1000, Direction.DOWN)
     # Move Away from the Coral Nursery
-    await straight(Direction.FORWARD, 150, 300)                     # 130
+    await straight(Direction.FORWARD, 165, 300)                     # 130
     # Turn towards the post of the scuba diver or cora nursery
     await turn(Direction.RIGHT, 0, -1, targetYaw=60)
     # Move towards the Coral Nursery
@@ -375,22 +391,23 @@ async def main():
 
     motion_sensor.reset_yaw(0)
     motor_pair.pair(motor_pair.PAIR_1, DriverMotor.LEFT, DriverMotor.RIGHT)
-
-    a = time.ticks_ms()
+    # a = time.ticks_ms()
     # await Run_1()
     # await Run_2()
+    # b = time.ticks_ms()
+    # print("Time it took to run Run 1 is ", (b-a)/1000, " Seconds\n")
 
-    angles = [5, 10, 15, 20, 30, 40, 45, 50, 55, 60, 65, 80, 90, 120, 180]
-    # angles=[120]
+    angles = [20, 30, 40, 45, 50, 60, 90, 95, 100, 110, 120, 130]
+    angles = [120, 130, 150]
+    angles = [5, 10, 15, 20]
+
     for angle in angles:
-        await turn(Direction.RIGHT, angle, -1)
-        g_yaw = 0
-        motion_sensor.reset_yaw(0)
-        await runloop.sleep_ms(2000)
-
-    b = time.ticks_ms()
-    print("Time it took to run Run 1 is ", (b-a)/1000, " Seconds\n")
-
+        for i in range(4):
+            g_yaw = 0
+            motion_sensor.reset_yaw(0)
+            await runloop.sleep_ms(1000)
+            await turn(Direction.RIGHT, 0, 1000, angle)
+            await runloop.sleep_ms(2000)
     return
 
     while True:
