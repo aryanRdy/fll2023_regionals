@@ -102,20 +102,6 @@ class DriverMotor:
     RIGHT = port.F
 
 
-def get_drift(tgt_yaw):
-    """Get drift gives how much you are drifted from your tgt_yaw angle."""
-    c_yaw = get_yaw()
-    # When robot is close to 360, it can drift to 2 or drift to 359
-    # This will take into consideration all the cases.
-    if tgt_yaw > 270 and c_yaw < 90:
-        # This condition is when your target yaw is in Q4 and Current yaw is in Q1
-        drift = 360 - tgt_yaw + c_yaw
-    else:
-        drift = c_yaw - tgt_yaw
-
-    return drift
-
-
 def get_yaw() -> int:
     """Gives current yaw in between 0 to 359
     As our Motor Left is connected to A and Right is Connected to B
@@ -124,6 +110,29 @@ def get_yaw() -> int:
     # Get Remainder, Yaw angle after one full circle.
     yaw = (round(yaw/10 * -1) + 360) % 360
     return yaw
+
+
+def get_drift(tgt_yaw):
+    """
+    Calculate the drift between the target yaw and the current yaw.
+
+    Parameters:
+        tgt_yaw (int): Target yaw angle (0 to 359)
+
+    Returns:
+        int: Drift value (+ve or -ve)
+    """
+    cur_yaw = get_yaw()  # Fetch the current yaw angle
+    # Calculate the raw drift
+    drift = cur_yaw - tgt_yaw
+
+    # Adjust drift to handle circular yaw values (0 to 359)
+    if drift > 180:
+        drift -= 360
+    elif drift < -180:
+        drift += 360
+
+    return drift
 
 
 def angleDiff(direction: int, tgt_yaw: int, curYaw: int = -500, update: bool = True) -> int:
@@ -164,7 +173,7 @@ async def straight(direction: int, distance: int, speed: int = 1050, accel: int 
     motor.reset_relative_position(DriverMotor.LEFT, 0)
     motor.reset_relative_position(DriverMotor.RIGHT, 0)
 
-    drift = get_drift(tgtYaw) * 2
+    drift = get_drift(tgtYaw)
 
     print("Straight: ", "direction", direction, "cur_yaw=", get_yaw(), " drift=",
           drift, " tgtYaw or gyaw=", tgtYaw, " distance=", distance, " speed=", speed)
@@ -176,7 +185,7 @@ async def straight(direction: int, distance: int, speed: int = 1050, accel: int 
 
     while distance > abs(motor.relative_position(DriverMotor.LEFT)):
         # Get current drift value
-        drift = get_drift(tgtYaw)
+        drift = int(get_drift(tgtYaw) * 3)
 
         # Calculate the distance fraction (alpha) between 0 and 1
         current_distance = abs(motor.relative_position(DriverMotor.LEFT))
@@ -187,7 +196,7 @@ async def straight(direction: int, distance: int, speed: int = 1050, accel: int 
         true_speed = int(easing(alpha))
         if true_speed < 400:
             true_speed = 400
-
+        # print("Straight drift=",drift, " Speed=",true_speed, " yaw=",get_yaw(), " current_distance=",current_distance)
         if direction == Direction.BACKWARD:
             motor_pair.move(motor_pair.PAIR_1, drift,
                             velocity=true_speed * -1, acceleration=accel)
@@ -222,7 +231,7 @@ async def turn(direction: int, degrees: int, speed: int = -1, targetYaw: int = -
     # Calculate target yaw if ent_degrees are provided
     if degrees != 0:  # If amount of degrees to turn is provided
         targetYaw = (g_yaw + degrees * (1 if direction ==
-                     Direction.RIGHT else -1)) % 360
+                                        Direction.RIGHT else -1)) % 360
     else:  # then targetYaw is provided
         targetYaw %= 360
 
@@ -230,14 +239,9 @@ async def turn(direction: int, degrees: int, speed: int = -1, targetYaw: int = -
 
     if speed == -1:
         speed = int(origDiff * 8.75)
+        speed = 1000
 
     easing = SineEaseIn(start=speed, end=100, duration=1)
-    debug = 0
-    if debug == 1:
-        print("direction=", direction, " g_yaw=", g_yaw, " Current Yaw=",
-              get_yaw(), " OrigDiff=", origDiff, " prev_diff=", prev_diff)
-        print("targertYaw=", targetYaw, " anglediff of current=", angleDiff(
-            direction, targetYaw, update=False), " prev_diff=", prev_diff, " SPeed=", speed)
 
     # error = (round(speed/(360-(origDiff/5))+4+0.0022*(degrees/45)))
     error = 0
@@ -274,8 +278,8 @@ async def turn(direction: int, degrees: int, speed: int = -1, targetYaw: int = -
     g_yaw = targetYaw  # Save the target yaw into our Global yaw.
     await runloop.sleep_ms(200)
     b = time.ticks_ms()
-    print("Start Angle=", initangle, "Target Angle=", targetYaw, " Actual Reached Angle=", get_yaw(
-    ), "Speed=", speed, " error=", angleDiff(direction, g_yaw, update=False), " Time=", (b-a)/1000, " Seconds")
+    print("Turn End: Start Angle=", initangle, "Target Angle=", targetYaw, " Actual Reached Angle=", get_yaw(
+    ), "Speed=", speed, " error=", angleDiff(direction, g_yaw, update=False), " Time=", (b-a)/1000, " Seconds\n")
 
 
 async def setGearsLeft():
@@ -310,7 +314,7 @@ async def readyForRun():
 
 async def Run_1():
     "This is Run 1"
-    await straight(Direction.FORWARD, 400, 500)         # Go Straight
+    await straight(Direction.FORWARD, 400, 500)        # Go Straight
     # Turn right towards the boat
     await turn(Direction.RIGHT, 0, -1, targetYaw=90)
     # Go straight in the direction of boat
@@ -340,7 +344,7 @@ async def Run_2():
     # Lift the arm after dropping the Coral Tree
     await attachmentMotor_async(Arm.RIGHT, 40, 300, Direction.UP)
     # Turn Right
-    await turn(Direction.RIGHT, 0, 500, targetYaw=45)
+    await turn(Direction.RIGHT, 0, -1, targetYaw=45)
     # Go At 45 degrees So we can turn towards the scuba diver
     await straight(Direction.BACKWARD, 750, 800)
     # Turn towards the Scuba diver mission
@@ -367,7 +371,7 @@ async def Run_2():
     # After hitting the coral nursery lift the ARM
     await attachmentMotor_async(Arm.LEFT, 100, 1000, Direction.DOWN)
     # Move Away from the Coral Nursery
-    await straight(Direction.FORWARD, 165, 300)                     # 130
+    await straight(Direction.FORWARD, 165, 300)                    # 130
     # Turn towards the post of the scuba diver or cora nursery
     await turn(Direction.RIGHT, 0, -1, targetYaw=60)
     # Move towards the Coral Nursery
@@ -391,30 +395,19 @@ async def main():
 
     motion_sensor.reset_yaw(0)
     motor_pair.pair(motor_pair.PAIR_1, DriverMotor.LEFT, DriverMotor.RIGHT)
-    # a = time.ticks_ms()
+    a = time.ticks_ms()
     # await Run_1()
-    # await Run_2()
-    # b = time.ticks_ms()
-    # print("Time it took to run Run 1 is ", (b-a)/1000, " Seconds\n")
+    await Run_2()
 
-    angles = [20, 30, 40, 45, 50, 60, 90, 95, 100, 110, 120, 130]
-    angles = [120, 130, 150]
-    angles = [5, 10, 15, 20]
+    b = time.ticks_ms()
+    print("Time it took to run Run 1 is ", (b-a)/1000, " Seconds\n")
 
-    for angle in angles:
-        for i in range(4):
-            g_yaw = 0
-            motion_sensor.reset_yaw(0)
-            await runloop.sleep_ms(1000)
-            await turn(Direction.RIGHT, 0, 1000, angle)
-            await runloop.sleep_ms(2000)
     return
-
     while True:
         color_detected = color_sensor.color(port.D)  # Read sensor value once
         if color_detected is color.BLUE:
             await readyForRun()
-            await speedyRun_1()
+            await Run_1()
 
         if color_detected is color.RED:
             await readyForRun()
@@ -422,23 +415,18 @@ async def main():
 
         elif color_detected is color.WHITE:
             await readyForRun()
-            await Run_3()
 
         elif color_detected is color.MAGENTA:  # research vessel
             await readyForRun()
-            await Run_5_2()
 
         elif color_detected is color.YELLOW:  # whale krill
             await readyForRun()
-            await Run_5_3()
 
         elif color_detected is color.AZURE:  # whale krill
             await readyForRun()
-            await backupRun1()
 
         elif color_detected is color.GREEN:  # whale krill
             await readyForRun()
-            await Run_2_backup()
 
         elif color_detected is color.BLACK:
             await setGearsLeft()
