@@ -164,7 +164,7 @@ def angleDiff(direction: int, tgt_yaw: int, curYaw: int = -500, update: bool = T
     return diff - 360  # Indicating overshoot
 
 
-async def straight(direction: int, distance: int, speed: int = 1050, accel: int = 2000):
+async def straight(direction: int, distance: int, speed: int = 1050, accel: int = 2000, msg="Hello"):
     """ Drives straight with acceleration and deceleration."""
     global g_yaw
     tgtYaw = g_yaw
@@ -175,7 +175,7 @@ async def straight(direction: int, distance: int, speed: int = 1050, accel: int 
 
     drift = get_drift(tgtYaw)
 
-    print("Straight: ", "direction", direction, "cur_yaw=", get_yaw(), " drift=",
+    print(msg, " Straight: ", "direction", direction, "cur_yaw=", get_yaw(), " drift=",
           drift, " tgtYaw or gyaw=", tgtYaw, " distance=", distance, " speed=", speed)
 
     # Set up easing functions for smooth speed transitions
@@ -352,26 +352,25 @@ async def Run_2():
     # Parallely bend down so that easy to lift the scuba diver
     attachmentMotor(Arm.RIGHT, 35, 300, Direction.DOWN)
     # Move towards the Scuba diver mission
-    await straight(Direction.BACKWARD, 460, 300)
+    await straight(Direction.BACKWARD, 450, 300)  # 460
     # Parallely Pick up the Scuba Diver
     attachmentMotor(Arm.RIGHT, 150, 300, Direction.UP)
     # Slam the shark mision
-    await attachmentMotor_async(Arm.LEFT, 280, 1000, Direction.UP)
+    await attachmentMotor_async(Arm.LEFT, 260, 1000, Direction.UP)  # 280
     # Lift the Shark arm completely back
-    attachmentMotor(Arm.LEFT, 300, 1000, Direction.DOWN)
+    attachmentMotor(Arm.LEFT, 250, 1000, Direction.DOWN)  # 300
     # Back up from the Scuba diver mission
-    # Use to be 125 changed the distance to 150
-    await straight(Direction.FORWARD, distance=150, speed=300)
+    await straight(Direction.FORWARD, distance=160, speed=300)  # 125  #150
     # Turn Right to face the coral nursery
     await turn(Direction.RIGHT, 0, -1, targetYaw=0)
     # Move towards the Coral Nursery
-    await straight(Direction.BACKWARD, 260, 300)                    # 230
+    await straight(Direction.BACKWARD, 235, 200)                    # 230
     # Hit the Coral Nursery
     await attachmentMotor_async(Arm.LEFT, degrees=255, speed=1000, direction=Direction.UP)
     # After hitting the coral nursery lift the ARM
     await attachmentMotor_async(Arm.LEFT, 100, 1000, Direction.DOWN)
     # Move Away from the Coral Nursery
-    await straight(Direction.FORWARD, 165, 300)                    # 130
+    await straight(Direction.FORWARD, 135, 300)                    # 130
     # Turn towards the post of the scuba diver or cora nursery
     await turn(Direction.RIGHT, 0, -1, targetYaw=60)
     # Move towards the Coral Nursery
@@ -379,13 +378,17 @@ async def Run_2():
     # Deliver the scuba diver
     await attachmentMotor_async(Arm.RIGHT, 150, 300, Direction.DOWN)
     # After delivering scuba diver go back a bit
-    await straight(Direction.FORWARD, 150, 300)
+    # await straight(Direction.FORWARD, 150, 300)
     # Turn away from coral nurssery
-    await turn(Direction.LEFT, 0, -1, targetYaw=10)
+    # await turn(Direction.LEFT, 0, -1, targetYaw=0)
+
+    await motor_pair.move_for_degrees(
+        motor_pair.PAIR_1, 300, -30, velocity=1000, acceleration=5000)
+    attachmentMotor(Arm.RIGHT, 150, 300, Direction.UP)
 
     # Back to home in Arch turn.
-    motor_pair.move_for_degrees(
-        motor_pair.PAIR_1, 1500, 5, velocity=1000, acceleration=5000)
+    await motor_pair.move_for_degrees(
+        motor_pair.PAIR_1, 1500, 8, velocity=1000, acceleration=5000)
 
 
 async def main():
@@ -396,6 +399,15 @@ async def main():
     motion_sensor.reset_yaw(0)
     motor_pair.pair(motor_pair.PAIR_1, DriverMotor.LEFT, DriverMotor.RIGHT)
     a = time.ticks_ms()
+
+    # await motor_pair.move_for_degrees(
+    #    motor_pair.PAIR_1, 300, -30, velocity=1000, acceleration=5000)
+    # attachmentMotor(Arm.RIGHT, 150, 300, Direction.UP)
+
+    # Back to home in Arch turn.
+    # await motor_pair.move_for_degrees(
+    #   motor_pair.PAIR_1, 1500, 8, velocity=1000, acceleration=5000)
+    # return
     # await Run_1()
     await Run_2()
 
