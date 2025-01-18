@@ -207,7 +207,7 @@ async def straight(direction: int, distance: int, speed: int = 1050, accel: int 
 
     # Stops the motors after the loop
     motor_pair.stop(motor_pair.PAIR_1, stop=motor.HOLD)
-    await runloop.sleep_ms(100)
+    await runloop.sleep_ms(200)
     b = time.ticks_ms()
 
     print("End Straight: cur_yaw=", get_yaw(), " drift=", drift, " tgtYaw or gyaw=", tgtYaw,
@@ -272,7 +272,7 @@ async def turn(direction: int, degrees: int, speed: int = -1, targetYaw: int = -
           "Speed=", speed, " Degrees to Turn=", origDiff, " BreakAhead=", breakAhead)
 
     while (agdiff := angleDiff(direction, targetYaw)) > breakAhead:
-        tgtSpeed = int(max((agdiff/origDiff) * speed, minSpeed))
+       # tgtSpeed = int(max((agdiff/origDiff) * speed, minSpeed))
 
         alpha = min(1 - (agdiff / origDiff), 1)
         # Use easing function to calculate the current speed
@@ -280,9 +280,7 @@ async def turn(direction: int, degrees: int, speed: int = -1, targetYaw: int = -
 
         if tgtSpeed < minSpeed:
             tgtSpeed = minSpeed
-        # tgtSpeed = int(max((agdiff/origDiff) * speed, 400))
-        # motor_pair.move_tank(motor_pair.PAIR_1, tgtSpeed * direction,
-        #                    tgtSpeed * direction * -1, acceleration=2000)
+
         motor.run(DriverMotor.LEFT, tgtSpeed * direction * -1)
         motor.run(DriverMotor.RIGHT, tgtSpeed * direction * -1)
         # print("speed=",tgtSpeed,"Agdiff:",agdiff)
@@ -292,7 +290,7 @@ async def turn(direction: int, degrees: int, speed: int = -1, targetYaw: int = -
     initangle = g_yaw
 
     g_yaw = targetYaw  # Save the target yaw into our Global yaw.
-    await runloop.sleep_ms(200)
+    await runloop.sleep_ms(250)
     b = time.ticks_ms()
     print("Turn End: Start Angle=", initangle, "Target Angle=", targetYaw, " Actual Reached Angle=", get_yaw(
     ), "Speed=", speed, " error=", angleDiff(direction, g_yaw, update=False), " Time=", (b-a)/1000, " Seconds\n")
@@ -336,21 +334,77 @@ async def readyForRun():
     motion_sensor.reset_yaw(0)
 
 
-async def Run_1():
+async def Run_1_1():
+    await straight(Direction.FORWARD, 450, 500)        # Go Straight
+    await turn(Direction.LEFT, 15, 200)
+    # await straight(Direction.BACKWARD, 500, 500)        # Go Straight
+    await motor_pair.move_for_degrees(
+        motor_pair.PAIR_1, -600, 20, velocity=1050, acceleration=8000)
+
+
+async def Run_1_2():
     "This is Run 1"
-    await straight(Direction.FORWARD, 400, 500)        # Go Straight
-    # Turn right towards the boat
-    await turn(Direction.RIGHT, 0, -1, targetYaw=90)
+    await straight(Direction.FORWARD, 380, 500)        # Go Straight
+    # Turn 90 right towards the boat
+    await turn(Direction.RIGHT, 0, 1000, targetYaw=90, error=0.02)
     # Go straight in the direction of boat
     await straight(Direction.FORWARD, 700, 800)
     # Take a sharp turn Towards the coral
-    await turn(Direction.RIGHT, 0, -1, targetYaw=135)
+    await turn(Direction.RIGHT, 0, -1, targetYaw=145)
     # Go straight to collect the Coral
-    await straight(Direction.BACKWARD, 500, 800)
+    await straight(Direction.BACKWARD, 680, 800)
+
     # Turn Right to collect Krill and Water Sample
-    await turn(Direction.RIGHT, 0, -1, targetYaw=135)
+    await turn(Direction.RIGHT, 0, 700, targetYaw=225, error=0.2)  # 500
+    attachmentMotor(Arm.RIGHT, 600, 250, Direction.DOWN)
     # Go straight to collect water sample and krill
-    await straight(Direction.BACKWARD, 200, 500)
+    await straight(Direction.BACKWARD, 350, 500)  # 300
+
+    # turn right towards the sea bed sample
+    # await turn(Direction.RIGHT, 30, 200, error=0.375) #500 speed
+    # await straight(Direction.BACKWARD, 100, 500)    #Added as part of new 200 degrees
+    # close the door
+
+    # 500 speed       30 degrees
+    await turn(Direction.LEFT, 13, 600, error=0.375)
+    # attachmentMotor(Arm.RIGHT,200, 600,Direction.UP)
+    await straight(Direction.FORWARD, 700, 1000)
+    await turn(Direction.LEFT, 180, 1000)
+    attachmentMotor(Arm.RIGHT, 600, 300, Direction.UP)
+    await straight(Direction.BACKWARD, 585, 1000)
+    await runloop.sleep_ms(1500)
+    await turn(Direction.LEFT, 8, 50)
+    await straight(Direction.FORWARD, 850, speed=900)
+    await turn(Direction.RIGHT, 0, 500, targetYaw=90)
+    await straight(Direction.FORWARD, 440, speed=400)
+    await straight(Direction.BACKWARD, 350, 1000)
+    await turn(Direction.RIGHT, 135, 1000)
+    await straight(Direction.FORWARD, 1000, speed=1000)
+
+    """    
+    # Parallely close
+    attachmentMotor(Arm.RIGHT,200, 300,Direction.DOWN)
+    # Go towards the sea bed sample.
+    await straight(Direction.BACKWARD, 740, 500)
+
+    #Turn to go into the Ring
+    await turn(Direction.LEFT, 30, 1000, error=0.2)
+
+    a =time.ticks_ms()
+    #Lift so that the Sea bed sample is on the Axle
+    await attachmentMotor_async(Arm.RIGHT,120, 200,Direction.UP)
+    await attachmentMotor_async(Arm.RIGHT,120, 100,Direction.DOWN)
+    b =time.ticks_ms()
+    print ("Time took to lift and down is ", (b-a)/1000)
+    #Turn right so you dont hit the Treasure mission
+    await turn(Direction.RIGHT, 30, 1000, error=0.6)
+
+    await straight(Direction.FORWARD, 600, 400)
+    await turn(Direction.LEFT, 35, 250, error=0.2)
+    await straight(Direction.FORWARD, 650, 400)
+    await turn(Direction.LEFT, 135, 800)
+    await straight(Direction.FORWARD, 150, 200)
+    """
 
 
 async def Run_2():
@@ -416,100 +470,6 @@ async def Run_2():
         motor_pair.PAIR_1, 1500, 7, velocity=1050, acceleration=8000)
 
 
-async def Run_atharv_old():
-    "Run Artificial Habitat squid angular fish"
-    await straight(Direction.BACKWARD, 77)
-    await turn(Direction.LEFT, 0, 500, targetYaw=-45)
-    await straight(Direction.BACKWARD, 900, 900)  # hitting the squid mission
-    # await runloop.sleep_ms(500) #letting the squid fall in
-    await straight(Direction.FORWARD, 300)  # backing up from squid mission
-
-    # starting to go towars angler fish
-    await turn(Direction.LEFT, 45, 500)
-    await straight(Direction.BACKWARD, 250)  # going west
-    await turn(Direction.RIGHT, 0, 500, -57)  # turning toward angler fish
-    await straight(Direction.BACKWARD, 900, 1200)  # ram into angler fish
-    # await straight(Direction.BACKWARD, 900, 700) #ram into angler fish
-    # await turn(Direction.LEFT, 10, 500) # push the angler fish in
-    # await turn(Direction.RIGHT, 0, 500, -55) # turn back into previous position
-    await straight(Direction.FORWARD, 100, 700)  # go away from angler fish
-
-    # drop squid
-    await turn(Direction.RIGHT, 65, 500)
-    await straight(Direction.BACKWARD, 120, 900)
-    # lift arm To drop of Squid
-    attachmentMotor(Arm.LEFT, 120, 700, Direction.DOWN)
-    await runloop.sleep_ms(500)
-    await straight(Direction.FORWARD, 180, 700)
-
-    # start going towards artificial habitat
-    await turn(Direction.LEFT, 70, 500)
-    await straight(Direction.FORWARD, 800)
-    # await turn(Direction.LEFT, 75, 700)
-    await turn(Direction.LEFT, 0, 700, targetYaw=-135)
-    await straight(Direction.BACKWARD, 40)
-
-    # reached artificial habitat
-    # Vam smacks the arm down in the next step
-    # drop arm to turn the artificial habitat
-    await attachmentMotor_async(Arm.LEFT, 150, 700, Direction.UP)
-    await turn(Direction.RIGHT, 75, 900)  # folding the artificial habitat
-    # aligning to get ready to flip artifical habitat
-    await straight(Direction.BACKWARD, 150)
-    # changed the spinning sometimes turn
-    await turn(Direction.LEFT, 0, 900, -95)
-    attachmentMotor(Arm.LEFT, 900, 600, Direction.DOWN)  # lift arm
-    attachmentMotor(Arm.RIGHT, 900, 600, Direction.DOWN)  # lift arm
-    await straight(Direction.FORWARD, 100, 800)
-
-    await straight(Direction.BACKWARD, 200)  # ramming
-    # Vam Increased the angle from 900 to 1200, to be more effective
-    attachmentMotor(Arm.RIGHT, 1200, 1200, Direction.UP)
-    # attachmentMotor(Arm.RIGHT, 900, 1200, Direction.UP)
-    # aligning to get ready to flip artifical habitat
-    await straight(Direction.BACKWARD, 215)
-    # Up until here, it rams & lifts the habitat once
-    # await attachmentMotor_async(Arm.RIGHT, 900, 1200, Direction.DOWN)# puts arm down for flip### Vam commented this line, as this is many times causing the attchment to get stuck in the habitat
-    await turn(Direction.RIGHT, 0, 500, -90)  # turns to align for last flip
-    await straight(Direction.BACKWARD, 100, 500)  # gets in range to flip it
-    await attachmentMotor_async(Arm.RIGHT, 900, 1200, Direction.UP)  # flips it
-
-    return
-    # boat mission
-
-    # backs up to turn, aprroach, and do mission
-    await straight(Direction.FORWARD, 800, 900)
-    attachmentMotor(Arm.RIGHT, 900, 1200, Direction.DOWN)
-    attachmentMotor(Arm.LEFT, 100, 1200, Direction.DOWN)
-    # turns to aprroach and do mission
-    await turn(Direction.RIGHT, 0, 1000, 43)
-    await straight(Direction.BACKWARD, 590, 500)  # approaches mission
-    await attachmentMotor_async(Arm.RIGHT, 900, 1200, Direction.UP)
-
-    # krill collection
-
-    await straight(Direction.FORWARD, 350, 700)  # backing up
-    attachmentMotor(Arm.RIGHT, 900, 1200, Direction.DOWN)
-    await turn(Direction.LEFT, 0, 500, -40)  # turning to the kill
-    await straight(Direction.BACKWARD, 325, 500)  # catches the first krill
-    # aligning to get coral and second krill
-    await turn(Direction.RIGHT, 0, 500, 3)
-    # getting coral and second krill
-    await straight(Direction.BACKWARD, 500, 500)
-    await turn(Direction.RIGHT, 0, 500, 50)  # aligning the third krill
-    await straight(Direction.BACKWARD, 150, 500)  # collecting third krill
-    # closing gate on attachment
-    await attachmentMotor_async(Arm.LEFT, 900, 1200, Direction.UP)
-    # Vam At this step, the robot is at the whale? station (where krills are dropped)
-    # return
-    await straight(Direction.FORWARD, 250, 700)
-    await turn(Direction.RIGHT, 0, 500, 165)
-
-    attachmentMotor(Arm.LEFT, 900, 1200, Direction.DOWN)
-
-    await straight(Direction.BACKWARD, 1250, 1000)
-
-
 async def main():
     """Main function"""
     global g_yaw
@@ -521,26 +481,8 @@ async def main():
     motion_sensor.reset_yaw(0)
     motor_pair.pair(motor_pair.PAIR_1, DriverMotor.LEFT, DriverMotor.RIGHT)
     a = time.ticks_ms()
-    """
-    await straight(Direction.FORWARD, distance=180, speed=400)# 125#150#160
-    await turn(Direction.RIGHT, 0, 1000, targetYaw=90,error=0.12)
-    # Move towards the Coral Nursery
-    await straight(Direction.BACKWARD, 275, 300)                    # 230
-    # Hit the Coral Nursery
-    await attachmentMotor_async(Arm.LEFT, degrees=255, speed=1000, direction=Direction.UP)
-    """
 
-    # await Run_2()
-
-    # await attachmentMotor_async(Arm.LEFT, 120, 600, Direction.DOWN)#lift arm
-    # c = time.ticks_ms()
-    # holdMotor(Arm.LEFT,Direction.DOWN,4000)
-    # d = time.ticks_ms()
-    # print("TIme=", d-c)
-    # await attachmentMotor_async(Arm.LEFT, 120, 600, Direction.UP)#lift arm
-    # await Run_atharv_old()
-    await Run_1()
-
+    await Run_1_2()
     b = time.ticks_ms()
     print("Time it took to run Run 1 is ", (b-a)/1000, " Seconds\n")
 
