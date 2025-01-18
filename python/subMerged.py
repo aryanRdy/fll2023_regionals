@@ -511,6 +511,120 @@ async def Run_3_2():
     print("Time took to finish Run_3 ", (b-a)/1000000, " seconds.")
 
 
+async def Run_4_1():
+
+    attachmentMotor(Arm.RIGHT, 200, 1200, Direction.UP)  # lift left arm
+
+    await straight(Direction.BACKWARD, 50, 500)  # changed from 70
+    await turn(Direction.LEFT, 0, 500, targetYaw=-45)
+    await straight(Direction.BACKWARD, 900, 600)  # hitting the squid mission
+
+    await runloop.sleep_ms(500)  # letting the squid fall in
+
+    await straight(Direction.FORWARD, 300)  # backing up from squid mission
+
+    # starting to go towars angler fish
+    await turn(Direction.LEFT, 45, 500)
+    await straight(Direction.BACKWARD, 270)  # going west # changed from 250
+    await turn(Direction.RIGHT, 0, 500, -57)  # turning toward angler fish
+    await straight(Direction.BACKWARD, 900, 1200)  # ram into angler fish
+    # await straight(Direction.BACKWARD, 900, 700) #ram into angler fish
+    await turn(Direction.LEFT, 10, 500)  # push the angler fish in
+    # turn back into previous position
+    await turn(Direction.RIGHT, 0, 500, -55)
+    await straight(Direction.FORWARD, 100, 700)  # go away from angler fish
+
+    # drop squid
+    await turn(Direction.RIGHT, 65, 500)
+    await straight(Direction.BACKWARD, 120, 900)
+    attachmentMotor(Arm.LEFT, 900, 100, Direction.DOWN)  # lift arm
+    await runloop.sleep_ms(500)
+    await straight(Direction.FORWARD, 180, 700)
+
+    # start going towards artificial habitat
+    await turn(Direction.LEFT, 70, 500)
+    await straight(Direction.FORWARD, 750, 900)
+    await turn(Direction.LEFT, 75, 700)
+
+    # reached artificial habitat
+    # Vam smacks the arm down in the next step
+    await attachmentMotor_async(Arm.LEFT, 150, 700, Direction.UP)  # drop arm
+    await straight(Direction.BACKWARD, 15, 200)  # go forward a little
+    await turn(Direction.RIGHT, 75, 900)  # folding the artificial habitat
+    # aligning to get ready to flip artifical habitat
+    await straight(Direction.BACKWARD, 150)
+    # changed the spinning sometimes turn
+    await turn(Direction.LEFT, 0, 900, -80)
+    attachmentMotor(Arm.LEFT, 900, 600, Direction.DOWN)  # lift arm
+    attachmentMotor(Arm.RIGHT, 900, 600, Direction.DOWN)  # lift arm
+    await straight(Direction.FORWARD, 75, 900)
+    # lift the cage
+    await attachmentMotor_async(Arm.LEFT, 300, 1200, Direction.DOWN)
+    # changed the spinning sometimes turn
+    await turn(Direction.LEFT, 0, 900, -90)
+    await straight(Direction.BACKWARD, 320, 600)  # ramming
+    # Vam Increased the angle from 900 to 1200, to be more effective4
+    await attachmentMotor_async(Arm.RIGHT, 300, 1200, Direction.UP)
+
+    # try flipping 1 more time
+    # await attachmentMotor_async(Arm.RIGHT, 300, 1200, Direction.DOWN) # Vam Increased the angle from 900 to 1200, to be more effective4
+    # await straight(Direction.BACKWARD, 150) # going forward to 2nd flip
+    # await attachmentMotor_async(Arm.RIGHT, 300, 1200, Direction.UP) # Vam Increased the angle from 900 to 1200, to be more effective4
+
+    await straight(Direction.FORWARD, 1000)
+    # Vam Increased the angle from 900 to 1200, to be more effective4
+    await attachmentMotor_async(Arm.RIGHT, 300, 1200, Direction.DOWN)
+
+    return
+    await straight(Direction.BACKWARD, 350)
+    await turn(Direction.RIGHT, 0, 900, -45)
+    await straight(Direction.BACKWARD, 100)
+
+    return
+
+
+async def Run_4_2():
+    # boat missio
+    attachmentMotor(Arm.RIGHT, 300, 1200, Direction.DOWN)
+    attachmentMotor(Arm.LEFT, 300, 1200, Direction.DOWN)
+    # backs up to turn, aprroach, and do mission
+    await straight(Direction.BACKWARD, 450, 700)
+    # turns to aprroach and do mission
+    await turn(Direction.RIGHT, 0, 1000, 35)
+    await straight(Direction.BACKWARD, 500, 900)  # approaches mission
+    await attachmentMotor_async(Arm.RIGHT, 900, 1200, Direction.UP)
+# await straight(Direction.FORWARD, 200, 900)# approaches mission
+
+    # krill collection
+
+    await straight(Direction.FORWARD, 350, 700)  # backing up
+    attachmentMotor(Arm.RIGHT, 300, 1200, Direction.DOWN)
+    await turn(Direction.LEFT, 0, 500, -40)  # turning to the kill
+    await straight(Direction.BACKWARD, 325, 500)  # catches the first krill
+    # aligning to get coral and second krill
+    await turn(Direction.RIGHT, 0, 500, 3)
+    # getting coral and second krill
+    await straight(Direction.BACKWARD, 520, 500)
+    # turn right a litte extra to move krills in the middle of the cage
+    await turn(Direction.RIGHT, 0, 500, 80)
+    # turn left to align to the third krill
+    await turn(Direction.LEFT, 0, 500, 60)
+    await straight(Direction.BACKWARD, 180, 200)  # collecting third krill
+    # closing gate on attachment
+    await attachmentMotor_async(Arm.LEFT, 100, 180, Direction.UP)
+    # Vam At this step, the robot is at the whale? station (where krills are dropped)
+
+    await straight(Direction.FORWARD, 270, 700)
+    await turn(Direction.RIGHT, 0, 500, 175)
+    await turn(Direction.LEFT, 0, 500, 165)
+
+    await straight(Direction.BACKWARD, 550, 1000)
+
+    attachmentMotor(Arm.LEFT, 900, 1200, Direction.DOWN)
+
+    await straight(Direction.BACKWARD, 700, 1000)
+
+
 async def Run_5():
     "This is Run_5"
     a = time.ticks_us()  # starting clock
