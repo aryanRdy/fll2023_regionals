@@ -158,7 +158,7 @@ def angleDiff(direction: int, tgt_yaw: int, curYaw: int = -500, update: bool = T
     else:
         diff = (cur_yaw - tgt_yaw) % 360
 
-    # print("AngleDiff curr_yaw=",cur_yaw, " diff=",diff, " prev_diff=",prev_diff, " diff-360=", diff-360)
+    # #print("AngleDiff curr_yaw=",cur_yaw, " diff=",diff, " prev_diff=",prev_diff, " diff-360=", diff-360)
     if (abs(diff - prev_diff) <= 10 and prev_diff != 1000) or diff <= prev_diff:
         prev_diff = diff if update else prev_diff
         return diff
@@ -197,7 +197,7 @@ async def straight(direction: int, distance: int, speed: int = 1050, accel: int 
         true_speed = int(easing(alpha))
         if true_speed < 400:
             true_speed = 400
-        # print("Straight drift=",drift, " Speed=",true_speed, " yaw=",get_yaw(), " current_distance=",current_distance)
+        # #print("Straight drift=",drift, " Speed=",true_speed, " yaw=",get_yaw(), " current_distance=",current_distance)
         if direction == Direction.BACKWARD:
             motor_pair.move(motor_pair.PAIR_1, drift,
                             velocity=true_speed * -1, acceleration=accel)
@@ -243,9 +243,9 @@ async def turn(direction: int, degrees: int, speed: int = -1, targetYaw: int = -
     # if g_yaw is 0 and targetYaw=90 but robot already crossed 90 by hitting a mission then generally the robot spins fast to get to the 90 which is not required.
     # To avoid that we calculate the diff between g_yaw and target yaw and cur_yaw and target yaw.
     if abs(actualDiff - origDiff) > 40:
-        print("Direction=", direction, "g_yaw=", g_yaw, " targetYaw=", targetYaw, " cur_yaw=", get_yaw(
-        ), "\nDiff between g_yaw and targetYaw=", origDiff, "Diff between currYaw and targetYaw=", actualDiff)
-        print("You do not need a turn, you are past the targetYaw\n")
+        # print("Direction=", direction, "g_yaw=", g_yaw, " targetYaw=", targetYaw, " cur_yaw=", get_yaw(
+        # ), "\nDiff between g_yaw and targetYaw=", origDiff, "Diff between currYaw and targetYaw=", actualDiff)
+        # print("You do not need a turn, you are past the targetYaw\n")
         return
 
     breakAhead = error * origDiff
@@ -283,7 +283,7 @@ async def turn(direction: int, degrees: int, speed: int = -1, targetYaw: int = -
 
         motor.run(DriverMotor.LEFT, tgtSpeed * direction * -1)
         motor.run(DriverMotor.RIGHT, tgtSpeed * direction * -1)
-        # print("speed=",tgtSpeed,"Agdiff:",agdiff)
+        # #print("speed=",tgtSpeed,"Agdiff:",agdiff)
 
     motor_pair.stop(motor_pair.PAIR_1, stop=motor.HOLD)
 
@@ -325,7 +325,7 @@ def holdMotor(workerMotor: int, direction, hold_time: int):
     a = time.ticks_ms()
     while (time.ticks_ms() - a) < hold_time:
         motor.run_for_degrees(workerMotor, 1*direction, 100, stop=motor.HOLD)
-    print("Held the motor for=", (time.ticks_ms()-a), " ms")
+    # print("Held the motor for=", (time.ticks_ms()-a), " ms")
 
 
 async def readyForRun():
@@ -380,31 +380,6 @@ async def Run_1_2():
     await straight(Direction.BACKWARD, 350, 1000)
     await turn(Direction.RIGHT, 135, 1000)
     await straight(Direction.FORWARD, 1000, speed=1000)
-
-    """    
-    # Parallely close
-    attachmentMotor(Arm.RIGHT,200, 300,Direction.DOWN)
-    # Go towards the sea bed sample.
-    await straight(Direction.BACKWARD, 740, 500)
-
-    #Turn to go into the Ring
-    await turn(Direction.LEFT, 30, 1000, error=0.2)
-
-    a =time.ticks_ms()
-    #Lift so that the Sea bed sample is on the Axle
-    await attachmentMotor_async(Arm.RIGHT,120, 200,Direction.UP)
-    await attachmentMotor_async(Arm.RIGHT,120, 100,Direction.DOWN)
-    b =time.ticks_ms()
-    print ("Time took to lift and down is ", (b-a)/1000)
-    #Turn right so you dont hit the Treasure mission
-    await turn(Direction.RIGHT, 30, 1000, error=0.6)
-
-    await straight(Direction.FORWARD, 600, 400)
-    await turn(Direction.LEFT, 35, 250, error=0.2)
-    await straight(Direction.FORWARD, 650, 400)
-    await turn(Direction.LEFT, 135, 800)
-    await straight(Direction.FORWARD, 150, 200)
-    """
 
 
 async def Run_2():
@@ -473,7 +448,7 @@ async def Run_2():
 
 
 async def Run_3_1():
-    print("This is Run_3_1")
+    # print("This is Run_3_1")
 
     # await straight(Direction.FORWARD, 300,40) # moving to the boat mission FROM HOME2 (slowing to 40)
     # moving to the boat mission FROM HOME2 (slowing to 40)
@@ -508,7 +483,7 @@ async def Run_3_2():
     await motor_pair.move_for_degrees(
         motor_pair.PAIR_1, -1400, -10, velocity=1050, acceleration=8000)
     b = time.ticks_us()  # stopping timer
-    print("Time took to finish Run_3 ", (b-a)/1000000, " seconds.")
+    # print("Time took to finish Run_3 ", (b-a)/1000000, " seconds.")
 
 
 async def Run_4_1():
@@ -627,7 +602,6 @@ async def Run_4_2():
 
 async def Run_5():
     "This is Run_5"
-    a = time.ticks_us()  # starting clock
 
     # Move towards the Whale Straight
     await straight(Direction.BACKWARD, 1270, 1000)
@@ -655,14 +629,11 @@ async def Run_5():
     attachmentMotor(Arm.LEFT, 10, 125, Direction.DOWN)
     await straight(Direction.BACKWARD, 810, 500)  # Push the flag down
     await straight(Direction.FORWARD, 50, 300)  # Moving back from
-    b = time.ticks_us()  # stopping timer
 
     await straight(Direction.FORWARD, 150, 300)  # Moving back from
 
     await attachmentMotor_async(Arm.RIGHT, 750, 700, Direction.DOWN)
 
-    print("Time took to finish Run_5_2 ",
-          (b-a)/1000000, " seconds.")
     # await attachmentMotor_async(Arm.RIGHT, 400, 700, Direction.DOWN)
 
 
@@ -676,37 +647,64 @@ async def main():
 
     motion_sensor.reset_yaw(0)
     motor_pair.pair(motor_pair.PAIR_1, DriverMotor.LEFT, DriverMotor.RIGHT)
-    a = time.ticks_ms()
 
-    await Run_1_2()
-    b = time.ticks_ms()
-    print("Time it took to run Run 1 is ", (b-a)/1000, " Seconds\n")
-
-    return
     while True:
         color_detected = color_sensor.color(port.D)  # Read sensor value once
         if color_detected is color.BLUE:
             await readyForRun()
-            await Run_1()
+            a = time.ticks_ms()
+            await Run_1_1()
+            b = time.ticks_ms()
+            print("Time it took to run Run 1_1 is ", (b-a)/1000, " Seconds\n")
 
-        if color_detected is color.RED:
+        elif color_detected is color.RED:
             await readyForRun()
+            a = time.ticks_ms()
+            await Run_1_2()
+            b = time.ticks_ms()
+            print("Time it took to run Run 1_2 is ", (b-a)/1000, " Seconds\n")
+
+        elif color_detected is color.GREEN:
+            await readyForRun()
+            a = time.ticks_ms()
             await Run_2()
-
-        elif color_detected is color.WHITE:
-            await readyForRun()
+            b = time.ticks_ms()
+            print("Time it took to run Run 2 is ", (b-a)/1000, " Seconds\n")
 
         elif color_detected is color.MAGENTA:  # research vessel
             await readyForRun()
+            a = time.ticks_ms()
+            await Run_3_1()
+            b = time.ticks_ms()
+            print("Time it took to run Run 3_1 is ", (b-a)/1000, " Seconds\n")
 
         elif color_detected is color.YELLOW:  # whale krill
             await readyForRun()
+            a = time.ticks_ms()
+            await Run_3_2()
+            b = time.ticks_ms()
+            print("Time it took to run Run 3_2 is ", (b-a)/1000, " Seconds\n")
+
+        elif color_detected is color.ORANGE:  # whale krill
+            await readyForRun()
+            a = time.ticks_ms()
+            await Run_4_1()
+            b = time.ticks_ms()
+            print("Time it took to run Run 4_1 is ", (b-a)/1000, " Seconds\n")
 
         elif color_detected is color.AZURE:  # whale krill
             await readyForRun()
+            a = time.ticks_ms()
+            await Run_4_2()
+            b = time.ticks_ms()
+            print("Time it took to run Run 4_2 is ", (b-a)/1000, " Seconds\n")
 
-        elif color_detected is color.GREEN:  # whale krill
+        elif color_detected is color.WHITE:  # whale krill
             await readyForRun()
+            a = time.ticks_ms()
+            await Run_5()
+            b = time.ticks_ms()
+            print("Time it took to run Run 5 is ", (b-a)/1000, " Seconds\n")
 
         elif color_detected is color.BLACK:
             await setGearsLeft()
