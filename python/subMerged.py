@@ -469,6 +469,88 @@ async def Run_2():
     await motor_pair.move_for_degrees(
         motor_pair.PAIR_1, 1500, 7, velocity=1050, acceleration=8000)
 
+# Boat mission
+
+
+async def Run_3_1():
+    print("This is Run_3_1")
+
+    # await straight(Direction.FORWARD, 300,40) # moving to the boat mission FROM HOME2 (slowing to 40)
+    # moving to the boat mission FROM HOME2 (slowing to 40)
+    await straight(Direction.FORWARD, 250, 40)
+
+    await straight(Direction.BACKWARD, 300, 700)  # going back home
+    # await turn(Direction.LEFT,0,500,-32) #turning to the SHARK PLACEMENT
+
+    # await runloop.sleep_ms(700) #REMOVE BOAT ATTACHEMENT
+
+
+async def Run_3_2():
+    "This is Run_3"
+    global g_yaw
+    a = time.ticks_us()  # starting clock
+    await straight(Direction.BACKWARD, 850, 800)  # moving to the shark 905
+    await turn(Direction.LEFT, 0, 620, targetYaw=-45)
+    await straight(Direction.BACKWARD, 500, 350)  # going in to the trident510
+    await turn(Direction.LEFT, 0, 620, targetYaw=-45)
+    await straight(Direction.BACKWARD, 500, 350)  # going in to the trident510
+
+    # getting the first part of the trident
+    await attachmentMotor_async(Arm.LEFT, 175, 200, Direction.UP)
+    # getting the first part of the trident
+    attachmentMotor(Arm.LEFT, 100, 150, Direction.UP)
+    # getting the second part of the trident
+    await straight(Direction.FORWARD, 280, 3)
+
+    await turn(Direction.RIGHT, 0, 1000, targetYaw=-5)
+    attachmentMotor(Arm.LEFT, 400, 300, Direction.DOWN)
+    await straight(Direction.BACKWARD, 1000, 1000)
+    await motor_pair.move_for_degrees(
+        motor_pair.PAIR_1, -1400, -10, velocity=1050, acceleration=8000)
+    b = time.ticks_us()  # stopping timer
+    print("Time took to finish Run_3 ", (b-a)/1000000, " seconds.")
+
+
+async def Run_5():
+    "This is Run_5"
+    a = time.ticks_us()  # starting clock
+
+    # Move towards the Whale Straight
+    await straight(Direction.BACKWARD, 1270, 1000)
+    # 45 Degree turn to align with Whale
+    await turn(Direction.RIGHT, 0, 300, targetYaw=45)
+    await straight(Direction.BACKWARD, 390, 300)  # Press the whale
+
+    # this lowers the arm needed to feed the whale
+    await attachmentMotor_async(Arm.RIGHT, 750, 1000, Direction.UP)
+    await runloop.sleep_ms(300)
+
+    # this is lowering the arm needed to do sonar discovery
+    attachmentMotor(Arm.LEFT, 200, 125, Direction.UP)
+    await straight(Direction.FORWARD, 555, 600)  # Backup from the whale
+
+    await turn(Direction.LEFT, 85, 700)  # Align to Sonar discovery
+    await runloop.sleep_ms(100)
+
+    await straight(Direction.BACKWARD, 260, 500)  # Move back from Whale
+    await turn(Direction.RIGHT, 20, 800)  # Turn Right in Sonar discovery
+    await straight(Direction.FORWARD, 300, 450)  # Push Sonar Discovery
+    # Turn to align with Sonar
+    await turn(Direction.LEFT, 0, 300, targetYaw=-55)
+    # this is lowering the arm needed to do sonar discovery
+    attachmentMotor(Arm.LEFT, 10, 125, Direction.DOWN)
+    await straight(Direction.BACKWARD, 810, 500)  # Push the flag down
+    await straight(Direction.FORWARD, 50, 300)  # Moving back from
+    b = time.ticks_us()  # stopping timer
+
+    await straight(Direction.FORWARD, 150, 300)  # Moving back from
+
+    await attachmentMotor_async(Arm.RIGHT, 750, 700, Direction.DOWN)
+
+    print("Time took to finish Run_5_2 ",
+          (b-a)/1000000, " seconds.")
+    # await attachmentMotor_async(Arm.RIGHT, 400, 700, Direction.DOWN)
+
 
 async def main():
     """Main function"""
