@@ -76,8 +76,8 @@ class SineEaseInOut(EasingBase):
 
 # end ese in ease out
 
-g_yaw = 0  # Define the global variable at the module level
-prev_diff = 1000  # Define the global variable at the module level
+g_yaw = 0# Define the global variable at the module level
+prev_diff = 1000# Define the global variable at the module level
 
 
 class Direction:
@@ -122,7 +122,7 @@ def get_drift(tgt_yaw):
     Returns:
         int: Drift value (+ve or -ve)
     """
-    cur_yaw = get_yaw()  # Fetch the current yaw angle
+    cur_yaw = get_yaw()# Fetch the current yaw angle
     # Calculate the raw drift
     drift = cur_yaw - tgt_yaw
 
@@ -162,7 +162,7 @@ def angleDiff(direction: int, tgt_yaw: int, curYaw: int = -500, update: bool = T
     if (abs(diff - prev_diff) <= 10 and prev_diff != 1000) or diff <= prev_diff:
         prev_diff = diff if update else prev_diff
         return diff
-    return diff - 360  # Indicating overshoot
+    return diff - 360# Indicating overshoot
 
 
 async def straight(direction: int, distance: int, speed: int = 1050, accel: int = 2000, msg="Hello"):
@@ -177,7 +177,7 @@ async def straight(direction: int, distance: int, speed: int = 1050, accel: int 
     drift = get_drift(tgtYaw)
 
     print(msg, " Straight: ", "direction", direction, "cur_yaw=", get_yaw(), " drift=",
-          drift, " tgtYaw or gyaw=", tgtYaw, " distance=", distance, " speed=", speed)
+        drift, " tgtYaw or gyaw=", tgtYaw, " distance=", distance, " speed=", speed)
 
     # Set up easing functions for smooth speed transitions
     # start was 1600
@@ -211,7 +211,7 @@ async def straight(direction: int, distance: int, speed: int = 1050, accel: int 
     b = time.ticks_ms()
 
     print("End Straight: cur_yaw=", get_yaw(), " drift=", drift, " tgtYaw or gyaw=", tgtYaw,
-          " distance=", abs(motor.relative_position(DriverMotor.LEFT)), " speed=", speed, " Time took=", (b-a)/1000, " Seconds\n")
+        " distance=", abs(motor.relative_position(DriverMotor.LEFT)), " speed=", speed, " Time took=", (b-a)/1000, " Seconds\n")
 
 
 async def turn(direction: int, degrees: int, speed: int = -1, targetYaw: int = -500, error: float = 0.02):
@@ -228,13 +228,13 @@ async def turn(direction: int, degrees: int, speed: int = -1, targetYaw: int = -
     global prev_diff
     global g_yaw
     minSpeed = 100
-    prev_diff = 1000  # Reset previous difference for comparison
+    prev_diff = 1000# Reset previous difference for comparison
 
     # Calculate target yaw if ent_degrees are provided
-    if degrees != 0:  # If amount of degrees to turn is provided
+    if degrees != 0:# If amount of degrees to turn is provided
         targetYaw = (g_yaw + degrees * (1 if direction ==
                                         Direction.RIGHT else -1)) % 360
-    else:  # then targetYaw is provided
+    else:# then targetYaw is provided
         targetYaw %= 360
 
     origDiff = angleDiff(direction, targetYaw, g_yaw, update=False)
@@ -269,7 +269,7 @@ async def turn(direction: int, degrees: int, speed: int = -1, targetYaw: int = -
     easing = SineEaseIn(start=speed, end=minSpeed, duration=1)
 
     print("Turn Start: Start Angle=", g_yaw, "Target Angle=", targetYaw, " Curent Angle=", get_yaw(),
-          "Speed=", speed, " Degrees to Turn=", origDiff, " BreakAhead=", breakAhead)
+        "Speed=", speed, " Degrees to Turn=", origDiff, " BreakAhead=", breakAhead)
 
     while (agdiff := angleDiff(direction, targetYaw)) > breakAhead:
         # tgtSpeed = int(max((agdiff/origDiff) * speed, minSpeed))
@@ -289,7 +289,7 @@ async def turn(direction: int, degrees: int, speed: int = -1, targetYaw: int = -
 
     initangle = g_yaw
 
-    g_yaw = targetYaw  # Save the target yaw into our Global yaw.
+    g_yaw = targetYaw# Save the target yaw into our Global yaw.
     await runloop.sleep_ms(250)
     b = time.ticks_ms()
     print("Turn End: Start Angle=", initangle, "Target Angle=", targetYaw, " Actual Reached Angle=", get_yaw(
@@ -313,7 +313,7 @@ def attachmentMotor(workerMotor: int, degrees: int, speed: int, direction: int):
     This function will not wait until the Lift action is performed
     """
     motor.run_for_degrees(workerMotor, degrees *
-                          direction, speed, stop=motor.HOLD)
+                        direction, speed, stop=motor.HOLD)
 
 
 async def attachmentMotor_async(workerMotor: int, degrees: int, speed: int, direction: int):
@@ -355,10 +355,10 @@ async def Run_1_2():
     await straight(Direction.BACKWARD, 680, 800)
 
     # Turn Right to collect Krill and Water Sample
-    await turn(Direction.RIGHT, 0, 700, targetYaw=225, error=0.2)  # 500
+    await turn(Direction.RIGHT, 0, 700, targetYaw=225, error=0.2)# 500
     attachmentMotor(Arm.RIGHT, 600, 250, Direction.DOWN)
     # Go straight to collect water sample and krill
-    await straight(Direction.BACKWARD, 350, 500)  # 300
+    await straight(Direction.BACKWARD, 350, 500)# 300
 
     # turn right towards the sea bed sample
     # await turn(Direction.RIGHT, 30, 200, error=0.375) #500 speed
@@ -399,18 +399,18 @@ async def Run_2():
     # Turn towards the Scuba diver mission
     await turn(Direction.LEFT, 0, 1000, targetYaw=-90, error=0.04)
     # Parallely bend down so that easy to lift the scuba diver
-    attachmentMotor(Arm.RIGHT, 30, 300, Direction.DOWN)  # 35,300
+    attachmentMotor(Arm.RIGHT, 30, 300, Direction.DOWN)# 35,300
     # Move towards the Scuba diver mission
-    await straight(Direction.BACKWARD, 450, 300)  # 460
+    await straight(Direction.BACKWARD, 450, 300)# 460
     # Parallely Pick up the Scuba Diver
     attachmentMotor(Arm.RIGHT, 150, 300, Direction.UP)
     # Slam the shark mision
-    await attachmentMotor_async(Arm.LEFT, 270, 1000, Direction.UP)  # 280
+    await attachmentMotor_async(Arm.LEFT, 270, 1000, Direction.UP)# 280
     # Lift the Shark arm completely back
-    attachmentMotor(Arm.LEFT, 250, 1000, Direction.DOWN)  # 300
+    attachmentMotor(Arm.LEFT, 250, 1000, Direction.DOWN)# 300
 
     # Back up from the Scuba diver mission
-    await straight(Direction.FORWARD, distance=160, speed=800)  # 125#150#160
+    await straight(Direction.FORWARD, distance=160, speed=800)# 125#150#160
     # Turn Right to face the coral nursery
     await turn(Direction.RIGHT, 0, 1000, targetYaw=0, error=0.12)
     # Move towards the Coral Nursery
@@ -425,7 +425,7 @@ async def Run_2():
     # Move Away from the Coral Nursery
     await straight(Direction.FORWARD, 140, 300)                    # 130
     # Turn towards the post of the scuba diver or cora nursery
-    await turn(Direction.RIGHT, 0, 800, targetYaw=55, error=0.20)  # .15 error
+    await turn(Direction.RIGHT, 0, 800, targetYaw=55, error=0.20)# .15 error
     # Move towards the Coral Nursery
     await straight(Direction.BACKWARD, 150, 300)
     # Deliver the scuba diver
@@ -434,7 +434,7 @@ async def Run_2():
     await runloop.sleep_ms(200)
 
     # After delivering scuba diver go back a bit
-    await straight(Direction.FORWARD, 100, 300)  # 150
+    await straight(Direction.FORWARD, 100, 300)# 150
     # Turn away from coral nurssery
     await turn(Direction.LEFT, 0, 1000, targetYaw=10)
 
@@ -454,7 +454,7 @@ async def Run_3_1():
     # moving to the boat mission FROM HOME2 (slowing to 40)
     await straight(Direction.FORWARD, 250, 40)
 
-    await straight(Direction.BACKWARD, 300, 700)  # going back home
+    await straight(Direction.BACKWARD, 300, 700)# going back home
     # await turn(Direction.LEFT,0,500,-32) #turning to the SHARK PLACEMENT
 
     # await runloop.sleep_ms(700) #REMOVE BOAT ATTACHEMENT
@@ -463,10 +463,13 @@ async def Run_3_1():
 async def Run_3_2():
     "This is Run_3"
     global g_yaw
-    a = time.ticks_us()  # starting clock
-    await straight(Direction.BACKWARD, 850, 800)  # moving to the shark 905
+    await straight(Direction.BACKWARD, 850, 800)# moving to the shark 905
+    await turn(Direction.LEFT, 0, 620, targetYaw=-35)
+    await straight(Direction.BACKWARD, 400, 350)# going in to the trident510
     await turn(Direction.LEFT, 0, 620, targetYaw=-45)
-    await straight(Direction.BACKWARD, 500, 350)  # going in to the trident510
+    await straight(Direction.BACKWARD, 100, 350)# going in to the trident510
+
+
     # await turn(Direction.LEFT, 0, 620, targetYaw=-45)
     # await straight(Direction.BACKWARD, 500, 350)# going in to the trident510
 
@@ -477,41 +480,40 @@ async def Run_3_2():
     # getting the second part of the trident
     await straight(Direction.FORWARD, 280, 3)
 
-    await turn(Direction.RIGHT, 0, 1000, targetYaw=-5)
     attachmentMotor(Arm.LEFT, 400, 300, Direction.DOWN)
+
+    await turn(Direction.RIGHT, 0, 1000, targetYaw=-5)
     await straight(Direction.BACKWARD, 1000, 1000)
     await motor_pair.move_for_degrees(
         motor_pair.PAIR_1, -1400, -10, velocity=1050, acceleration=8000)
-    b = time.ticks_us()  # stopping timer
-    # print("Time took to finish Run_3 ", (b-a)/1000000, " seconds.")
 
 
 async def Run_4_1():
 
-    attachmentMotor(Arm.RIGHT, 200, 1200, Direction.UP)  # lift left arm
-    await straight(Direction.BACKWARD, 50, 500)  # changed from 70
+    attachmentMotor(Arm.RIGHT, 200, 1200, Direction.UP)# lift left arm
+    await straight(Direction.BACKWARD, 50, 500)# changed from 70
     await turn(Direction.LEFT, 0, 500, targetYaw=-45)
-    await straight(Direction.BACKWARD, 900, 600)  # hitting the squid mission
+    await straight(Direction.BACKWARD, 900, 600)# hitting the squid mission
 
-    await runloop.sleep_ms(500)  # letting the squid fall in
+    await runloop.sleep_ms(500)# letting the squid fall in
 
-    await straight(Direction.FORWARD, 300)  # backing up from squid mission
+    await straight(Direction.FORWARD, 300)# backing up from squid mission
 
     # starting to go towars angler fish
     await turn(Direction.LEFT, 45, 500)
-    await straight(Direction.BACKWARD, 270)  # going west # changed from 250
-    await turn(Direction.RIGHT, 0, 500, -57)  # turning toward angler fish
-    await straight(Direction.BACKWARD, 900, 1200)  # ram into angler fish
+    await straight(Direction.BACKWARD, 270)# going west # changed from 250
+    await turn(Direction.RIGHT, 0, 500, -57)# turning toward angler fish
+    await straight(Direction.BACKWARD, 900, 1200)# ram into angler fish
     # await straight(Direction.BACKWARD, 900, 700) #ram into angler fish
-    await turn(Direction.LEFT, 10, 500)  # push the angler fish in
+    await turn(Direction.LEFT, 10, 500)# push the angler fish in
     # turn back into previous position
     await turn(Direction.RIGHT, 0, 500, -55)
-    await straight(Direction.FORWARD, 100, 700)  # go away from angler fish
+    await straight(Direction.FORWARD, 100, 700)# go away from angler fish
 
     # drop squid
     await turn(Direction.RIGHT, 65, 500)
     await straight(Direction.BACKWARD, 120, 900)
-    attachmentMotor(Arm.LEFT, 900, 100, Direction.DOWN)  # lift arm
+    attachmentMotor(Arm.LEFT, 900, 100, Direction.DOWN)# lift arm
     await runloop.sleep_ms(500)
     await straight(Direction.FORWARD, 180, 700)
 
@@ -522,15 +524,15 @@ async def Run_4_1():
 
     # reached artificial habitat
     # Vam smacks the arm down in the next step
-    await attachmentMotor_async(Arm.LEFT, 150, 700, Direction.UP)  # drop arm
-    await straight(Direction.BACKWARD, 35, 200)  # go forward a little
-    await turn(Direction.RIGHT, 75, 900)  # folding the artificial habitat
+    await attachmentMotor_async(Arm.LEFT, 150, 700, Direction.UP)# drop arm
+    await straight(Direction.BACKWARD, 35, 200)# go forward a little
+    await turn(Direction.RIGHT, 75, 900)# folding the artificial habitat
     # aligning to get ready to flip artifical habitat
     await straight(Direction.BACKWARD, 150)
     # changed the spinning sometimes turn
     await turn(Direction.LEFT, 0, 900, -98)
-    attachmentMotor(Arm.LEFT, 900, 600, Direction.DOWN)  # lift arm
-    attachmentMotor(Arm.RIGHT, 900, 600, Direction.DOWN)  # lift arm
+    attachmentMotor(Arm.LEFT, 900, 600, Direction.DOWN)# lift arm
+    attachmentMotor(Arm.RIGHT, 900, 600, Direction.DOWN)# lift arm
     await straight(Direction.FORWARD, 75, 900)
     await straight(Direction.BACKWARD, 500, 700)
     # lift the cage
@@ -560,16 +562,16 @@ async def Run_4_2():
     await straight(Direction.BACKWARD, 450, 700)
     # turns to aprroach and do mission
     await turn(Direction.RIGHT, 0, 1000, 35)
-    await straight(Direction.BACKWARD, 500, 900)  # approaches mission
+    await straight(Direction.BACKWARD, 500, 900)# approaches mission
     await attachmentMotor_async(Arm.RIGHT, 300, 1200, Direction.UP)
 # await straight(Direction.FORWARD, 200, 900)# approaches mission
 
     # krill collection
 
-    await straight(Direction.FORWARD, 350, 700)  # backing up
+    await straight(Direction.FORWARD, 350, 700)# backing up
     attachmentMotor(Arm.RIGHT, 300, 1200, Direction.DOWN)
-    await turn(Direction.LEFT, 0, 500, -40)  # turning to the kill
-    await straight(Direction.BACKWARD, 325, 500)  # catches the first krill
+    await turn(Direction.LEFT, 0, 500, -40)# turning to the kill
+    await straight(Direction.BACKWARD, 325, 500)# catches the first krill
     # aligning to get coral and second krill
     await turn(Direction.RIGHT, 0, 500, 3)
     # getting coral and second krill
@@ -578,7 +580,7 @@ async def Run_4_2():
     await turn(Direction.RIGHT, 0, 500, 80)
     # turn left to align to the third krill
     await turn(Direction.LEFT, 0, 500, 60)
-    await straight(Direction.BACKWARD, 180, 200)  # collecting third krill
+    await straight(Direction.BACKWARD, 180, 200)# collecting third krill
     # closing gate on attachment
     await attachmentMotor_async(Arm.LEFT, 150, 500, Direction.UP)
     # Vam At this step, the robot is at the whale? station (where krills are dropped)
@@ -607,7 +609,7 @@ async def Run_5():
     await straight(Direction.BACKWARD, 1270, 1000)
     # 45 Degree turn to align with Whale
     await turn(Direction.RIGHT, 0, 300, targetYaw=45)
-    await straight(Direction.BACKWARD, 390, 300)  # Press the whale
+    await straight(Direction.BACKWARD, 390, 300)# Press the whale
 
     # this lowers the arm needed to feed the whale
     await attachmentMotor_async(Arm.RIGHT, 750, 1000, Direction.UP)
@@ -615,22 +617,22 @@ async def Run_5():
 
     # this is lowering the arm needed to do sonar discovery
     attachmentMotor(Arm.LEFT, 200, 125, Direction.UP)
-    await straight(Direction.FORWARD, 555, 600)  # Backup from the whale
+    await straight(Direction.FORWARD, 555, 600)# Backup from the whale
 
-    await turn(Direction.LEFT, 85, 700)  # Align to Sonar discovery
+    await turn(Direction.LEFT, 85, 700)# Align to Sonar discovery
     await runloop.sleep_ms(100)
 
-    await straight(Direction.BACKWARD, 260, 500)  # Move back from Whale
-    await turn(Direction.RIGHT, 20, 800)  # Turn Right in Sonar discovery
-    await straight(Direction.FORWARD, 300, 450)  # Push Sonar Discovery
+    await straight(Direction.BACKWARD, 260, 500)# Move back from Whale
+    await turn(Direction.RIGHT, 20, 800)# Turn Right in Sonar discovery
+    await straight(Direction.FORWARD, 300, 450)# Push Sonar Discovery
     # Turn to align with Sonar
     await turn(Direction.LEFT, 0, 300, targetYaw=-55)
     # this is lowering the arm needed to do sonar discovery
     attachmentMotor(Arm.LEFT, 10, 125, Direction.DOWN)
-    await straight(Direction.BACKWARD, 810, 500)  # Push the flag down
-    await straight(Direction.FORWARD, 50, 300)  # Moving back from
+    await straight(Direction.BACKWARD, 810, 500)# Push the flag down
+    await straight(Direction.FORWARD, 50, 300)# Moving back from
 
-    await straight(Direction.FORWARD, 150, 300)  # Moving back from
+    await straight(Direction.FORWARD, 150, 300)# Moving back from
 
     await attachmentMotor_async(Arm.RIGHT, 750, 700, Direction.DOWN)
 
@@ -650,7 +652,7 @@ async def main():
 
     count = 0
     while True:
-        color_detected = color_sensor.color(port.D)  # Read sensor value once
+        color_detected = color_sensor.color(port.D)# Read sensor value once
         # print ("Color Detected:",color_detected)
 
         if color_detected is color.BLUE:
@@ -661,7 +663,7 @@ async def main():
                 await Run_1_1()
                 b = time.ticks_ms()
                 print("Time it took to run Run 1_1 is ",
-                      (b-a)/1000, " Seconds\n")
+                    (b-a)/1000, " Seconds\n")
                 count = 1
             elif count == 1:
                 print("Run 1_2")
@@ -670,7 +672,7 @@ async def main():
                 await Run_1_2()
                 b = time.ticks_ms()
                 print("Time it took to run Run 1_2 is ",
-                      (b-a)/1000, " Seconds\n")
+                    (b-a)/1000, " Seconds\n")
 
         elif color_detected is color.GREEN:
             print("Run 2")
@@ -680,35 +682,35 @@ async def main():
             b = time.ticks_ms()
             print("Time it took to run Run 2 is ", (b-a)/1000, " Seconds\n")
 
-        elif color_detected is color.MAGENTA:  # research vessel
+        elif color_detected is color.MAGENTA:# research vessel
             await readyForRun()
             a = time.ticks_ms()
             await Run_3_1()
             b = time.ticks_ms()
             print("Time it took to run Run 3_1 is ", (b-a)/1000, " Seconds\n")
 
-        elif color_detected is color.YELLOW:  # whale krill
+        elif color_detected is color.YELLOW:# whale krill
             await readyForRun()
             a = time.ticks_ms()
             await Run_3_2()
             b = time.ticks_ms()
             print("Time it took to run Run 3_2 is ", (b-a)/1000, " Seconds\n")
 
-        elif color_detected is color.UNKNOWN:  # Orange # whale krill
+        elif color_detected is color.UNKNOWN:# Orange # whale krill
             await readyForRun()
             a = time.ticks_ms()
             await Run_4_1()
             b = time.ticks_ms()
             print("Time it took to run Run 4_1 is ", (b-a)/1000, " Seconds\n")
 
-        elif color_detected is color.RED:  # whale krill
+        elif color_detected is color.RED:# whale krill
             await readyForRun()
             a = time.ticks_ms()
             await Run_4_2()
             b = time.ticks_ms()
             print("Time it took to run Run 4_2 is ", (b-a)/1000, " Seconds\n")
 
-        elif color_detected is color.WHITE:  # whale krill
+        elif color_detected is color.WHITE:# whale krill
             await readyForRun()
             a = time.ticks_ms()
             await Run_5()
