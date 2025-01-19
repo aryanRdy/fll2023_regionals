@@ -629,7 +629,7 @@ async def Run_5():
     await turn(Direction.LEFT, 0, 300, targetYaw=-55)
     # this is lowering the arm needed to do sonar discovery
     attachmentMotor(Arm.LEFT, 10, 125, Direction.DOWN)
-    await straight(Direction.BACKWARD, 810, 500)# Push the flag down
+    await straight(Direction.BACKWARD, 830, 500)# Push the flag down
     await straight(Direction.FORWARD, 50, 300)# Moving back from
 
     await straight(Direction.FORWARD, 150, 300)# Moving back from
