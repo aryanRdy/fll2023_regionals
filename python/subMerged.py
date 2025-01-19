@@ -544,7 +544,7 @@ async def Run_4_1():
     # await straight(Direction.BACKWARD, 150) # going forward to 2nd flip
     # await attachmentMotor_async(Arm.RIGHT, 300, 1200, Direction.UP) # Vam Increased the angle from 900 to 1200, to be more effective4
 
-    await turn(Direction.RIGHT, 0, 900, -70)
+    await turn(Direction.RIGHT, 0, 900, -85)
     await straight(Direction.FORWARD, 1000)
     # Vam Increased the angle from 900 to 1200, to be more effective4
     await attachmentMotor_async(Arm.RIGHT, 300, 1200, Direction.DOWN)
@@ -561,7 +561,7 @@ async def Run_4_2():
     # turns to aprroach and do mission
     await turn(Direction.RIGHT, 0, 1000, 35)
     await straight(Direction.BACKWARD, 500, 900)  # approaches mission
-    await attachmentMotor_async(Arm.RIGHT, 900, 1200, Direction.UP)
+    await attachmentMotor_async(Arm.RIGHT, 300, 1200, Direction.UP)
 # await straight(Direction.FORWARD, 200, 900)# approaches mission
 
     # krill collection
@@ -587,11 +587,17 @@ async def Run_4_2():
     await turn(Direction.RIGHT, 0, 500, 175)
     await turn(Direction.LEFT, 0, 500, 165)
 
-    await straight(Direction.BACKWARD, 950, 1000)
+    liftParallely()
+    await straight(Direction.BACKWARD, 1250, 3000)
 
+    # attachmentMotor(Arm.LEFT, 900, 1200, Direction.DOWN)
+
+    # await straight(Direction.BACKWARD, 300, 1000)
+
+
+def liftParallely():
+    runloop.sleep_ms(1000)
     attachmentMotor(Arm.LEFT, 900, 1200, Direction.DOWN)
-
-    await straight(Direction.BACKWARD, 300, 1000)
 
 
 async def Run_5():
@@ -642,25 +648,29 @@ async def main():
     motion_sensor.reset_yaw(0)
     motor_pair.pair(motor_pair.PAIR_1, DriverMotor.LEFT, DriverMotor.RIGHT)
 
+    count = 0
     while True:
         color_detected = color_sensor.color(port.D)  # Read sensor value once
         # print ("Color Detected:",color_detected)
 
         if color_detected is color.BLUE:
             print("Run 1_1")
-            await readyForRun()
-            a = time.ticks_ms()
-            await Run_1_1()
-            b = time.ticks_ms()
-            print("Time it took to run Run 1_1 is ", (b-a)/1000, " Seconds\n")
-
-        elif color_detected is color.RED:
-            print("Run 1_2")
-            await readyForRun()
-            a = time.ticks_ms()
-            await Run_1_2()
-            b = time.ticks_ms()
-            print("Time it took to run Run 1_2 is ", (b-a)/1000, " Seconds\n")
+            if count == 0:
+                await readyForRun()
+                a = time.ticks_ms()
+                await Run_1_1()
+                b = time.ticks_ms()
+                print("Time it took to run Run 1_1 is ",
+                      (b-a)/1000, " Seconds\n")
+                count = 1
+            elif count == 1:
+                print("Run 1_2")
+                await readyForRun()
+                a = time.ticks_ms()
+                await Run_1_2()
+                b = time.ticks_ms()
+                print("Time it took to run Run 1_2 is ",
+                      (b-a)/1000, " Seconds\n")
 
         elif color_detected is color.GREEN:
             print("Run 2")
@@ -691,7 +701,7 @@ async def main():
             b = time.ticks_ms()
             print("Time it took to run Run 4_1 is ", (b-a)/1000, " Seconds\n")
 
-        elif color_detected is color.AZURE:  # whale krill
+        elif color_detected is color.RED:  # whale krill
             await readyForRun()
             a = time.ticks_ms()
             await Run_4_2()
